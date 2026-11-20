@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="TradeCheck Lab - Local, transparent trade document validation prototype." />
+  <title>TradeCheck Lab | Pre-Issuance Document Review</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-icon">T<span>✓</span></span><span><strong>TRADECHECK</strong><small>LAB / v0.1</small></span></div>
+      <div class="navlabel">PROJECT WORKSPACE</div>
+      <nav aria-label="Sections"><a href="#workspace" class="nav-active"><span>▤</span> Document review</a><a href="#process"><span>◇</span> How it works</a><a href="#results"><span>▥</span> Review report</a></nav>
+      <div class="sidebar-bottom">
+        <div class="local-box"><span class="dot"></span><span>Runs locally<br/><small>No uploads to the cloud</small></span></div>
+        <p>Student prototype for Topic 2<br/>Shenzhou International case study</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar"><span>SUPPLY CHAIN COMPETITION <span class="slash">/</span> TOPIC 2</span><span class="version">MVP · 19 NOV 2026</span></header>
+      <div class="content">
+        <div class="hero">
+          <div class="eyebrow"><span class="mini-line"></span> EXPORT OPERATIONS / QUALITY ASSURANCE</div>
+          <h1>Catch document errors <em>before</em> shipment.</h1>
+          <p>Compare a commercial invoice with a packing list. Detect mismatched quantities, weights, references and missing fields before the documents are finalised.</p>
+          <div class="tags"><span>01 Extraction</span><span>02 Normalisation</span><span>03 Cross-check</span><span>04 Human review</span></div>
+        </div>
+
+        <section id="workspace" class="panel workspace">
+          <div class="section-head"><div><span class="section-kicker">01 / WORKSPACE</span><h2>Choose document input</h2></div><span class="pill subdued">Two-document MVP</span></div>
+          <div class="tabbar" role="tablist" aria-label="Document input mode">
+            <button type="button" class="tab active" data-tab="sample" role="tab" aria-selected="true">Try demo documents</button>
+            <button type="button" class="tab" data-tab="upload" role="tab" aria-selected="false">Upload your PDFs</button>
+            <button type="button" class="tab" data-tab="text" role="tab" aria-selected="false">Paste document text</button>
+          </div>
+          <div id="tab-sample" class="tabpanel">
+            <p class="panel-note">Select a test case. Every sample is fictional and intentionally labelled as test data — not Shenzhou's private shipping records.</p>
+            <div class="controlrow"><label for="sampleCase">TEST SCENARIO</label><select id="sampleCase" aria-label="Test scenario"><option value="clean">Correct documents</option><option value="quantity_error">Quantity mismatch</option><option value="invoice_error">Invoice number mismatch</option><option value="origin_error">Origin discrepancy</option><option value="multiple_errors">Several errors</option><option value="description_review">Product description difference</option><option value="bad_invoice_total">Incorrect invoice calculation</option></select></div>
+            <p id="caseDescription" class="hint">All key fields match; a green result is expected.</p>
+          </div>
+          <div id="tab-upload" class="tabpanel hidden">
+            <p class="panel-note">Use text-based PDF documents. Scanned image-only PDFs are not yet supported. Documents are processed in memory on this computer.</p>
+            <div class="upload-grid"><label class="file-upload"><span class="file-symbol">▧</span><strong>Commercial invoice</strong><small id="invoiceName">Choose PDF (max 8 MB)</small><input id="invoiceFile" type="file" accept="application/pdf,.pdf" /></label><label class="file-upload"><span class="file-symbol">▤</span><strong>Packing list</strong><small id="packingName">Choose PDF (max 8 MB)</small><input id="packingFile" type="file" accept="application/pdf,.pdf" /></label></div>
+          </div>
+          <div id="tab-text" class="tabpanel hidden">
+            <p class="panel-note">Enter labelled fields such as <code>Invoice No: INV-001</code>, <code>Quantity (pcs): 5000</code>, and <code>Country of Origin: China</code>, one per line.</p>
+            <div class="text-grid"><div><label for="invoiceText">INVOICE TEXT</label><textarea id="invoiceText" rows="11" spellcheck="false" placeholder="Invoice No: INV-001&#10;Invoice Date: 2026-11-18&#10;Description of Goods: Cotton knitted T-shirts&#10;Quantity (pcs): 5000&#10;Cartons: 100&#10;Gross Weight (kg): 850&#10;Country of Origin: China"></textarea></div><div><label for="packingText">PACKING LIST TEXT</label><textarea id="packingText" rows="11" spellcheck="false" placeholder="Invoice No: INV-001&#10;Description of Goods: Cotton knitted T-shirts&#10;Quantity (pcs): 4800&#10;Cartons: 100&#10;Gross Weight (kg): 850&#10;Country of Origin: China"></textarea></div></div>
+          </div>
+          <div class="actionline"><button id="runButton" class="primary" type="button"><span id="runIcon">↗</span> <span id="runLabel">Run document checks</span></button><span class="action-detail">Advisory checks only · No customs or legal rulings</span></div>
+          <div id="errorBox" class="errorbox hidden" role="alert"></div>
+        </section>
+
+        <section id="process" class="process"><div class="section-kicker">02 / VALIDATION PIPELINE</div><div class="process-grid"><div><span>01</span><b>Extract</b><small>PDF text and field values</small></div><div><span>02</span><b>Normalise</b><small>Numbers, IDs and country names</small></div><div><span>03</span><b>Compare</b><small>Field-by-field cross-checks</small></div><div><span>04</span><b>Flag</b><small>Red / amber / green review</small></div></div></section>
+
+        <section id="results" class="panel resultspanel">
+          <div class="section-head"><div><span class="section-kicker">03 / REVIEW REPORT</span><h2>Validation results</h2></div><div class="exportButtons"><button id="exportJson" class="quiet" disabled>Download JSON</button><button id="exportCsv" class="quiet" disabled>Download CSV</button></div></div>
+          <div id="emptyState" class="empty-state"><div class="empty-icon">▤</div><strong>No review has been run yet</strong><p>Choose a sample or upload documents, then select “Run document checks”.</p></div>
+          <div id="reportView" class="hidden">
+            <div id="riskBanner" class="risk-banner"><div><div class="risk-kicker">DOCUMENT STATUS</div><div id="riskLabel" class="risk-label">–</div><p id="riskNote">–</p></div><span class="risk-icon" id="riskIcon">●</span></div>
+            <div class="stats"><div class="stat"><span>FIELDS & RULES CHECKED</span><strong id="checks">–</strong></div><div class="stat"><span>CHECKS PASSED</span><strong id="passed">–</strong></div><div class="stat"><span>ISSUES FLAGGED</span><strong id="flags">–</strong></div><div class="stat"><span>PROCESSING TIME</span><strong id="speed">–</strong></div></div>
+            <div class="subheading"><h3>Detected issues</h3><span id="issueCount">0 items</span></div><div id="issuesList" class="issues-list"></div>
+            <div class="subheading"><h3>Cross-document comparison</h3><span>Invoice vs Packing list</span></div>
+            <div class="tablewrap"><table><thead><tr><th>Field</th><th>Invoice</th><th>Packing list</th><th>Result</th></tr></thead><tbody id="compareRows"></tbody></table></div>
+            <details class="details"><summary>View extracted fields and limitations</summary><div class="rawfields"><div><h4>Invoice fields</h4><pre id="invoiceFields"></pre></div><div><h4>Packing list fields</h4><pre id="packingFields"></pre></div></div><h4>Limitations</h4><ul id="limitations"></ul></details>
+          </div>
+        </section>
+        <footer>TRADECHECK LAB · STUDENT COMPETITION MVP <span>SIMULATED CASE STUDY · NOT A PRODUCTION CUSTOMS SYSTEM</span></footer>
+      </div>
+    </main>
+  </div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+{
+  "notice": "SELF-GENERATED, SYNTHETIC DEMO CASES ONLY. NOT A FIELD ACCURACY MEASUREMENT OR A MANUAL TIME-SAVINGS COMPARISON.",
+  "scenarios": 7,
+  "status_expected_correct": 7,
+  "manual_baseline_measured": false,
+  "results": [
+    {
+      "scenario": "clean",
+      "expected": "green",
+      "actual": "green",
+      "status_as_expected": true,
+      "flags": 0,
+      "checks": 35,
+      "processing_ms": 0.9,
+      "issue_codes": []
+    },
+    {
+      "scenario": "quantity_error",
+      "expected": "red",
+      "actual": "red",
+      "status_as_expected": true,
+      "flags": 1,
+      "checks": 35,
+      "processing_ms": 0.2,
+      "issue_codes": [
+        "CROSS_DOCUMENT_MISMATCH"
+      ]
+    },
+    {
+      "scenario": "invoice_error",
+      "expected": "red",
+      "actual": "red",
+      "status_as_expected": true,
+      "flags": 1,
+      "checks": 35,
+      "processing_ms": 0.2,
+      "issue_codes": [
+        "CROSS_DOCUMENT_MISMATCH"
+      ]
+    },
+    {
+      "scenario": "origin_error",
+      "expected": "red",
+      "actual": "red",
+      "status_as_expected": true,
+      "flags": 1,
+      "checks": 35,
+      "processing_ms": 0.3,
+      "issue_codes": [
+        "CROSS_DOCUMENT_MISMATCH"
+      ]
+    },
+    {
+      "scenario": "multiple_errors",
+      "expected": "red",
+      "actual": "red",
+      "status_as_expected": true,
+      "flags": 4,
+      "checks": 35,
+      "processing_ms": 0.4,
+      "issue_codes": [
+        "CROSS_DOCUMENT_MISMATCH",
+        "CROSS_DOCUMENT_MISMATCH",
+        "CROSS_DOCUMENT_MISMATCH",
+        "WEIGHT_RULE"
+      ]
+    },
+    {
+      "scenario": "description_review",
+      "expected": "amber",
+      "actual": "amber",
+      "status_as_expected": true,
+      "flags": 1,
+      "checks": 35,
+      "processing_ms": 4.2,
+      "issue_codes": [
+        "DESCRIPTION_REVIEW"
+      ]
+    },
+    {
+      "scenario": "bad_invoice_total",
+      "expected": "red",
+      "actual": "red",
+      "status_as_expected": true,
+      "flags": 1,
+      "checks": 35,
+      "processing_ms": 0.3,
+      "issue_codes": [
+        "INVOICE_TOTAL_ERROR"
+      ]
+    }
+  ]
+}
