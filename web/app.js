@@ -24,7 +24,7 @@
   }
   getSamples();
 
-  [['invoiceFile','invoiceName'],['packingFile','packingName']].forEach(([input,label]) => {
+  [['invoiceFile','invoiceName'],['packingFile','packingName'],['bolFile','bolName'],['cooFile','cooName']].forEach(([input,label]) => {
     $(input).addEventListener('change', () => { $(label).textContent = $(input).files?.[0]?.name || 'Choose PDF (max 8 MB)'; });
   });
   const toBase64 = async file => {
@@ -45,13 +45,20 @@
     $('runIcon').textContent = '◌';
     try {
       let data;
-      if (activeTab === 'sample') data = {mode:'sample',sample:$('sampleCase').value};
-      else if (activeTab === 'text') data = {mode:'text',invoice_text:$('invoiceText').value, packing_text:$('packingText').value};
+      if (activeTab === 'sample') data = {mode:'sample',sample:$('sampleCase').value,extra_case:$('extraCase').value};
+      else if (activeTab === 'text') data = {mode:'text',invoice_text:$('invoiceText').value, packing_text:$('packingText').value,bol_text:$('bolText').value,coo_text:$('cooText').value};
       else {
         const inv = $('invoiceFile').files?.[0], pack = $('packingFile').files?.[0];
         if (!inv || !pack) throw new Error('Please select both an invoice and a packing list PDF.');
         const [i,p] = await Promise.all([toBase64(inv),toBase64(pack)]);
         data = {mode:'upload',invoice_base64:i,packing_base64:p,invoice_name:inv.name,packing_name:pack.name};
+        for (const kind of ['bol','coo']) {
+          const f = $(kind+'File').files?.[0];
+          if (f) {
+            data[kind+'_base64'] = await toBase64(f);
+            data[kind+'_name'] = f.name;
+          }
+        }
       }
       const response = await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
       const result = await response.json();
@@ -90,6 +97,10 @@
     $('compareRows').innerHTML=result.comparisons.map(it => `<tr><td>${escapeHtml(it.label)}</td><td>${escapeHtml(it.invoice)}</td><td>${escapeHtml(it.packing)}</td><td><span class="status ${escapeHtml(it.status)}">${escapeHtml(it.status)}</span></td></tr>`).join('');
     $('invoiceFields').textContent=JSON.stringify(result.invoice_fields,null,2);
     $('packingFields').textContent=JSON.stringify(result.packing_fields,null,2);
+    const extra = result.extra_comparisons || [];
+    $('extraResults').classList.toggle('hidden', !extra.length);
+    $('extraRows').innerHTML=extra.map(it => `<tr><td>${escapeHtml(it.document)}</td><td>${escapeHtml(it.label)}</td><td>${escapeHtml(it.reference_source)}: ${escapeHtml(it.reference)}</td><td>${escapeHtml(it.document_value)}</td><td><span class="status ${escapeHtml(it.status)}">${escapeHtml(it.status)}</span></td></tr>`).join('');
+    $('extraFields').textContent=JSON.stringify(result.extra_fields || {},null,2);
     $('limitations').innerHTML=result.limitations.map(i=>'<li>'+escapeHtml(i)+'</li>').join('');
   }
   function download(name,type,contents) {
@@ -106,8 +117,9 @@
       if (/^[=+@\-\t\r]/.test(t)) t="'"+t; // avoid spreadsheet formula injection
       return '"'+t.replaceAll('"','""')+'"';
     };
-    let rows=[['Field','Invoice','Packing list','Status']];
-    lastReport.comparisons.forEach(i=>rows.push([i.label,i.invoice,i.packing,i.status]));
+    let rows=[['Document','Field','Reference','Observed value','Status']];
+    lastReport.comparisons.forEach(i=>rows.push(['Invoice vs packing list',i.label,i.invoice,i.packing,i.status]));
+    (lastReport.extra_comparisons || []).forEach(i=>rows.push([i.document,i.label,i.reference,i.document_value,i.status]));
     download('tradecheck_comparison.csv','text/csv;charset=utf-8','\ufeff'+rows.map(row=>row.map(csvEscape).join(',')).join('\r\n'));
   });
 })();
