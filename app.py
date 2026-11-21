@@ -13,7 +13,8 @@ import mimetypes
 import threading
 import webbrowser
 
-from engine import MAX_FILE_BYTES, review_pdfs, review_texts
+from engine import MAX_FILE_BYTES
+from extended_review import review_bundle_pdfs, review_bundle_texts, SYNTHETIC_EXTRAS
 from make_samples import CASES
 
 ROOT = Path(__file__).resolve().parent
@@ -21,13 +22,13 @@ WEB = ROOT / 'web'
 SAMPLES = ROOT / 'samples'
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = 'TradeCheckLocal/0.1'
+    server_version = 'TradeCheckLocal/0.2'
     def do_GET(self):
         pathname = self.path.split('?')[0]
         if pathname == '/api/samples':
             return self.json_response(200, [{k: v for k, v in c.items() if k not in ('changes_invoice','changes_packing')} for c in CASES])
         if pathname == '/api/health':
-            return self.json_response(200, {'ok': True, 'name': 'TradeCheck Lab', 'version': '0.1.0'})
+            return self.json_response(200, {'ok': True, 'name': 'TradeCheck Lab', 'version': '0.2.0'})
         assets = {'/': 'index.html', '/index.html': 'index.html', '/style.css': 'style.css', '/app.js': 'app.js'}
         if pathname not in assets:
             return self.send_error(404, 'Not found')
@@ -47,7 +48,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_error(404)
         try:
             length = int(self.headers.get('Content-Length', '0'))
-            if length <= 0 or length > 2 * MAX_FILE_BYTES * 2 + 10_000:
+            if length <= 0 or length > 4 * MAX_FILE_BYTES * 2 + 20_000:
                 raise ValueError('Request is empty or too large.')
             if 'application/json' not in self.headers.get('Content-Type', ''):
                 raise ValueError('Expected JSON request.')
@@ -59,13 +60,24 @@ class Handler(BaseHTTPRequestHandler):
                     raise ValueError('Unknown sample. Pick one of the listed samples.')
                 invoice = (SAMPLES / f'{case}_invoice.pdf').read_bytes()
                 packing = (SAMPLES / f'{case}_packing.pdf').read_bytes()
-                result = review_pdfs(invoice, packing, {'source': 'SYNTHETIC SAMPLE', 'case': case})
+                extra_case = data.get('extra_case') or ''
+                if extra_case not in ('', *SYNTHETIC_EXTRAS):
+                    raise ValueError('Unknown optional draft-document scenario.')
+                result = review_bundle_pdfs(invoice, packing, None,
+                            {'source': 'SYNTHETIC SAMPLE', 'case': case})
+                if extra_case:
+                    from engine import extract_pdf_text
+                    result = review_bundle_texts(extract_pdf_text(invoice), extract_pdf_text(packing),
+                                SYNTHETIC_EXTRAS[extra_case],
+                                {'source': 'SYNTHETIC SAMPLE', 'case': case, 'extra_case': extra_case})
             elif mode == 'text':
                 invoice = data.get('invoice_text', '')
                 packing = data.get('packing_text', '')
-                if len(invoice) > 150_000 or len(packing) > 150_000:
-                    raise ValueError('Text is too long.')
-                result = review_texts(invoice, packing, {'source': 'USER-PASTED TEXT'})
+                extras = {kind: data.get(f'{kind}_text', '') for kind in ('bol', 'coo')
+                          if str(data.get(f'{kind}_text', '')).strip()}
+                if any(not isinstance(t, str) or len(t) > 150_000 for t in [invoice, packing, *extras.values()]):
+                    raise ValueError('Text is too long or invalid.')
+                result = review_bundle_texts(invoice, packing, extras, {'source': 'USER-PASTED TEXT'})
             elif mode == 'upload':
                 def decode(name):
                     encoded = data.get(name, '')
@@ -75,10 +87,14 @@ class Handler(BaseHTTPRequestHandler):
                         return base64.b64decode(encoded, validate=True)
                     except (binascii.Error, ValueError):
                         raise ValueError('Invalid PDF data.')
-                result = review_pdfs(decode('invoice_base64'), decode('packing_base64'),
+                extras = {kind: decode(f'{kind}_base64') for kind in ('bol', 'coo')
+                          if data.get(f'{kind}_base64')}
+                result = review_bundle_pdfs(decode('invoice_base64'), decode('packing_base64'),
+                                     extras,
                                      {'source': 'USER-UPLOADED PDFS (IN-MEMORY)',
                                       'invoice_name': str(data.get('invoice_name', 'invoice.pdf'))[:100],
-                                      'packing_name': str(data.get('packing_name', 'packing.pdf'))[:100]})
+                                      'packing_name': str(data.get('packing_name', 'packing.pdf'))[:100],
+                                      'optional_docs': list(extras)})
             else:
                 raise ValueError('Choose sample, upload, or text review.')
             self.json_response(200, result)
