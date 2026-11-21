@@ -1,0 +1,14 @@
+# Local or generated files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.DS_Store
+Thumbs.db
+*.mp4
+*.mov
+# Evaluation data may include sensitive shipping details; keep raw inputs local.
+evaluation/private/
+evaluation/measurements.csv
+evaluation/report.md
