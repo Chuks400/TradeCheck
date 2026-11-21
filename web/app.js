@@ -60,6 +60,8 @@
           }
         }
       }
+      data.use_llm = $('useLlm').checked;
+      data.llm_model = $('llmModel').value.trim() || 'qwen2.5:3b';
       const response = await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Unable to review documents.');
@@ -82,6 +84,16 @@
     ['exportJson','exportCsv'].forEach(id => $(id).disabled = false);
     const risk = result.status;
     $('riskBanner').className='risk-banner '+risk;
+    const llm = result.llm || {status:'disabled'};
+    let llmMessage = 'LLM OFF — deterministic rules and basic NLP similarity only.';
+    if (llm.status === 'applied') {
+      const added = Object.values(llm.added_fields || {}).reduce((n,fields) => n + fields.length, 0);
+      llmMessage = 'LOCAL LLM ACTIVE ('+String(llm.model)+') — '+String(llm.documents_processed)+' document(s) processed; '+added+' new field(s) extracted and source-checked. Verify original documents.';
+    } else if (llm.status === 'fallback') {
+      llmMessage = 'LLM UNAVAILABLE — rule-only review completed. '+String(llm.warning || 'Check Ollama installation.');
+    }
+    $('llmStatus').textContent = llmMessage;
+    $('llmStatus').className = 'llm-status '+(llm.status === 'applied' ? 'active' : llm.status === 'fallback' ? 'fallback' : '');
     const labels = {green:'GREEN — NO ISSUES DETECTED',amber:'AMBER — HUMAN REVIEW NEEDED',red:'RED — INVESTIGATE BEFORE APPROVAL'};
     const notes = {green:'No problems were detected by the checks available in this prototype. Not a customs approval.',amber:'One or more fields need human confirmation before the documents are finalised.',red:'One or more discrepancies or invalid fields were found. Correct them before finalising.'};
     $('riskLabel').textContent=labels[risk]||risk;

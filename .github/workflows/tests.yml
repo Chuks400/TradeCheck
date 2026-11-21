@@ -20,4 +20,6 @@ jobs:
       - name: Run synthetic demo smoke test
         run: python evaluate_demo.py
       - name: Compile source
-        run: python -m compileall -q app.py engine.py extended_review.py evaluation
+        run: python -m compileall -q app.py engine.py extended_review.py llm_review.py llm_live_smoke.py evaluation
+      - name: Check browser JavaScript syntax
+        run: node --check web/app.js
