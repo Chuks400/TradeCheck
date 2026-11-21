@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import re
 from urllib.request import Request, urlopen
+from time import perf_counter
 from urllib.error import HTTPError, URLError
 
 from engine import FIELD_PATTERNS, parse_fields
@@ -162,6 +163,7 @@ def review_with_local_llm(
     model: str = DEFAULT_MODEL,
     extractor=None,
 ) -> dict:
+    started = perf_counter()
     docs = {"invoice": invoice_text, "packing": packing_text, **(extras or {})}
     if any(kind not in DOC_LABELS for kind in docs):
         raise ValueError("Unsupported document type.")
@@ -202,6 +204,9 @@ def review_with_local_llm(
         {k: v for k, v in enriched.items() if k in ("bol", "coo")},
         metadata,
     )
+    # Processing time includes local model inference and deterministic checks, not user upload/review time.
+    result["summary"]["rule_check_ms"] = result["summary"]["processing_ms"]
+    result["summary"]["processing_ms"] = round((perf_counter() - started) * 1000, 1)
     result["llm"] = status
     if use_llm:
         result["limitations"].append(
