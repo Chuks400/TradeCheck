@@ -42,7 +42,7 @@ CANONICAL_LABELS = {
 }
 # Keep the model constrained to the parser's existing field vocabulary.
 FIELDS = tuple(f for f in CANONICAL_LABELS if f in FIELD_PATTERNS)
-MODEL_PATTERN = re.compile(r"^[a-zA-Z0-9_.:/-]{1,70}$")
+MODEL_PATTERN = re.compile(r"^[a-zA-Z0-9_.:-]{1,70}$")
 
 
 class LLMUnavailable(RuntimeError):
