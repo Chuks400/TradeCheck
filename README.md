@@ -1,4 +1,4 @@
-# TradeCheck Lab — AI-Assisted Trade Document Review (MVP v0.2)
+# TradeCheck Lab — AI-Assisted Trade Document Review (MVP v0.3)
 
 **Student competition prototype for Topic 2: AI-Enabled Optimization of International Supply Chain Business Processes.**
 
@@ -39,7 +39,15 @@ python3 app.py --open
 
 ### Is it AI?
 
-This is a **hybrid rule-based + NLP-assisted baseline**, rather than a trained generative AI system. It uses `scikit-learn` character n-gram TF-IDF similarity for variable product descriptions. Exact numerical and required-field checks are deterministic for accuracy and auditability. There is **no integrated LLM**, no AI customs/rules judgment, and no automatic submission or issuance. Later versions can add OCR, multilingual entity extraction, a learned text-similarity model and a verified customs rule library.
+TradeCheck has three complementary layers:
+
+- **Deterministic checks** compare numbers, dates, references and documents. These remain the decision layer.
+- **Basic NLP** uses character n-gram TF-IDF for similar product descriptions.
+- **Optional local LLM** via Ollama extracts candidate fields from less familiar text layouts. It does **not** decide whether trade documents are legally valid. Suggested values are only used if they can be found in the source text, and every result needs human confirmation.
+
+Without Ollama the original rule-based/NLP prototype still works. With Ollama installed, the system uses a real local language model, not an API simulation. **LLM tests in CI use mocks**; the separate live smoke test invokes the actual downloaded model on your own machine.
+
+No customs rulings, legal approvals, document issuance or cloud LLM services are included. OCR of scanned PDFs is still outside the scope.
 
 ## Sample test cases
 
@@ -56,6 +64,36 @@ The `samples/` folder contains **14 simulated PDFs** (7 invoice/packing-list pai
 | bad_invoice_total | RED: wrong invoice calculation |
 
 To regenerate them: `python make_samples.py`.
+
+
+
+## Set up a real local LLM (optional — Windows)
+
+1. Install **Ollama** from [ollama.com/download](https://ollama.com/download). Open the Ollama application.
+2. Open PowerShell and download the model once:
+
+   ```powershell
+   ollama pull qwen2.5:3b
+   ollama list
+   ```
+
+   Qwen2.5 3B is approximately **1.9 GB** to download. It runs locally; slower PCs may take longer to process each document.
+3. Start TradeCheck normally using `start_windows.bat` or `python app.py --open`.
+4. Check **Use local LLM for field extraction** in the document-review screen. Keep model name `qwen2.5:3b`.
+5. Try **Correct documents** with **Incorrect carton count on bill of lading** under the optional extended test, then click **Run document checks**.
+6. Read the LLM status above the results. **LOCAL LLM ACTIVE** confirms that the local model ran. **LLM UNAVAILABLE** means it did not run and deterministic checks were used instead.
+
+For an automated four-document **real LLM** smoke test, run from the project folder:
+
+```powershell
+python llm_live_smoke.py
+```
+
+This test runs the model against four **fictional** documents and checks for two seeded discrepancies. It is **not** evidence of accuracy on independent company documents. Do not report its measurements as real-world human time savings.
+
+### Privacy and limitations
+
+The Python backend sends document text to **127.0.0.1:11434** (the local Ollama process) only when you enable the LLM. It does not use a paid API key or upload document text to a remote LLM provider. Only text-based PDFs are supported; the LLM cannot OCR scanned images. Model-suggested field values must appear in the source text, but this does not guarantee they were extracted from the correct section or that the resulting documents are compliant. An employee must always verify the original documents.
 
 
 ## Optional draft-document checks (v0.2)
@@ -97,6 +135,8 @@ Review **the same 7 document pairs** manually and record who spotted which known
 - `web/` – responsive user interface.
 - `samples/` – 14 sample PDFs.
 - `extended_review.py` – optional draft-document checks and fictional demo draft data.
+- `llm_review.py` – optional local Ollama field extraction and rule-engine fallback.
+- `llm_live_smoke.py` – command-line test against a real locally installed model.
 - `evaluation/` – blank worksheet and scoring script for observed manual-versus-tool results.
 - `tests/` – automated checks.
 - `research_context.md` – verified figures from supplied Shenzhou reports.
