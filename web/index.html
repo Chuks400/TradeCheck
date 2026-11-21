@@ -10,7 +10,7 @@
 <body>
   <div class="shell">
     <aside class="sidebar">
-      <div class="brand"><span class="brand-icon">T<span>✓</span></span><span><strong>TRADECHECK</strong><small>LAB / v0.2</small></span></div>
+      <div class="brand"><span class="brand-icon">T<span>✓</span></span><span><strong>TRADECHECK</strong><small>LAB / v0.3</small></span></div>
       <div class="navlabel">PROJECT WORKSPACE</div>
       <nav aria-label="Sections"><a href="#workspace" class="nav-active"><span>▤</span> Document review</a><a href="#process"><span>◇</span> How it works</a><a href="#results"><span>▥</span> Review report</a></nav>
       <div class="sidebar-bottom">
@@ -20,7 +20,7 @@
     </aside>
 
     <main class="main">
-      <header class="topbar"><span>SUPPLY CHAIN COMPETITION <span class="slash">/</span> TOPIC 2</span><span class="version">MVP · 19 NOV 2026</span></header>
+      <header class="topbar"><span>SUPPLY CHAIN COMPETITION <span class="slash">/</span> TOPIC 2</span><span class="version">MVP v0.3 · NOV 2026</span></header>
       <div class="content">
         <div class="hero">
           <div class="eyebrow"><span class="mini-line"></span> EXPORT OPERATIONS / QUALITY ASSURANCE</div>
@@ -66,16 +66,22 @@
               <div><label for="cooText">CERTIFICATE OF ORIGIN DRAFT (OPTIONAL)</label><textarea id="cooText" rows="6" spellcheck="false" placeholder="Invoice No: INV-001&#10;Country of Origin: China"></textarea></div>
             </div>
           </div>
+          <div class="llm-config">
+            <label class="llm-check" for="useLlm"><input id="useLlm" type="checkbox" /> <span><strong>Use local LLM for field extraction</strong><small>Optional · Ollama must be installed and running</small></span></label>
+            <div class="llm-model"><label for="llmModel">OLLAMA MODEL</label><input id="llmModel" type="text" value="qwen2.5:3b" maxlength="70" spellcheck="false" /></div>
+            <p>Documents stay on this computer. The LLM suggests fields; deterministic checks still detect discrepancies. If Ollama is unavailable, rule-based checks continue.</p>
+          </div>
           <div class="actionline"><button id="runButton" class="primary" type="button"><span id="runIcon">↗</span> <span id="runLabel">Run document checks</span></button><span class="action-detail">Advisory checks only · No customs or legal rulings</span></div>
           <div id="errorBox" class="errorbox hidden" role="alert"></div>
         </section>
 
-        <section id="process" class="process"><div class="section-kicker">02 / VALIDATION PIPELINE</div><div class="process-grid"><div><span>01</span><b>Extract</b><small>PDF text and field values</small></div><div><span>02</span><b>Normalise</b><small>Numbers, IDs and country names</small></div><div><span>03</span><b>Compare</b><small>Field-by-field cross-checks</small></div><div><span>04</span><b>Flag</b><small>Red / amber / green review</small></div></div></section>
+        <section id="process" class="process"><div class="section-kicker">02 / VALIDATION PIPELINE</div><div class="process-grid"><div><span>01</span><b>Extract</b><small>PDF text, optionally with a local LLM</small></div><div><span>02</span><b>Normalise</b><small>Numbers, IDs and country names</small></div><div><span>03</span><b>Compare</b><small>Field-by-field cross-checks</small></div><div><span>04</span><b>Flag</b><small>Red / amber / green review</small></div></div></section>
 
         <section id="results" class="panel resultspanel">
           <div class="section-head"><div><span class="section-kicker">03 / REVIEW REPORT</span><h2>Validation results</h2></div><div class="exportButtons"><button id="exportJson" class="quiet" disabled>Download JSON</button><button id="exportCsv" class="quiet" disabled>Download CSV</button></div></div>
           <div id="emptyState" class="empty-state"><div class="empty-icon">▤</div><strong>No review has been run yet</strong><p>Choose a sample or upload documents, then select “Run document checks”.</p></div>
           <div id="reportView" class="hidden">
+            <p id="llmStatus" class="llm-status" role="status"></p>
             <div id="riskBanner" class="risk-banner"><div><div class="risk-kicker">DOCUMENT STATUS</div><div id="riskLabel" class="risk-label">–</div><p id="riskNote">–</p></div><span class="risk-icon" id="riskIcon">●</span></div>
             <div class="stats"><div class="stat"><span>FIELDS & RULES CHECKED</span><strong id="checks">–</strong></div><div class="stat"><span>CHECKS PASSED</span><strong id="passed">–</strong></div><div class="stat"><span>ISSUES FLAGGED</span><strong id="flags">–</strong></div><div class="stat"><span>PROCESSING TIME</span><strong id="speed">–</strong></div></div>
             <div class="subheading"><h3>Detected issues</h3><span id="issueCount">0 items</span></div><div id="issuesList" class="issues-list"></div>
