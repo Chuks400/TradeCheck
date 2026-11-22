@@ -6,8 +6,8 @@
     "flags": 2,
     "critical": 2,
     "review": 0,
-    "processing_ms": 58625.0,
-    "rule_check_ms": 31.8
+    "processing_ms": 62668.0,
+    "rule_check_ms": 23.3
   },
   "invoice_fields": {
     "invoice_number": "INV-2025-031-001",
@@ -149,10 +149,11 @@
   "limitations": [
     "Prototype only: does not issue or legally approve trade documents.",
     "Supports one product line per document; multi-line invoices need further development.",
+    "Unit conversion covers kg, pcs and cartons only (plus DOZ, LB and common spellings); anything else is flagged for review.",
     "PDF text layer required; image-only scanned PDFs need OCR, not yet included.",
     "No live company, carrier, customs or certificate-of-origin integration.",
     "NLP similarity is a baseline, not a trained model of customs/legal equivalence.",
-    "Draft bill of lading and certificate of origin: field-consistency checks only; no authenticity, HS, tariff, or rules-of-origin determination.",
+    "Draft bill of lading and certificate of origin: field-consistency checks only; no authenticity, tariff classification or rules-of-origin determination.",
     "LLM fields are evidence-checked suggestions, not verified facts. A human must confirm extracted values against original documents."
   ],
   "extra_fields": {
@@ -273,6 +274,7 @@
       "similarity": null
     }
   ],
+  "field_sources": {},
   "llm": {
     "enabled": true,
     "status": "applied",
@@ -284,6 +286,7 @@
       "bol": [],
       "coo": []
     },
+    "guards": [],
     "warning": ""
   }
 }
