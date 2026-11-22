@@ -1,0 +1,10 @@
+Invoice No: INV-2025-031-001
+Purchase Order: PO-2025-001
+Consignee: Wave Rider Supplies Pty Ltd
+Description of Goods: Professional Longboard - Ocean Series; Performance Shortboard - Pro Series; Surfboard Fin Set - Thruster; Premium Wetsuit - 3/2mm
+Quantity (pcs): 250
+Cartons: 6
+Gross Weight (kg): 520
+Net Weight (kg): 475
+Country of Origin: VN
+HS Code: 950629

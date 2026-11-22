@@ -1,0 +1,300 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://unvtd.unece.org/commercial-invoice-context.jsonld"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "CommercialInvoiceCredential"
+  ],
+  "name": "Commercial Invoice",
+  "credentialSchema": {
+    "id": "https://unvtd.unece.org/commercial-invoice-schema.json",
+    "type": "JsonSchema"
+  },
+  "id": "urn:uuid:e9bf65a3-9ff3-4988-8c44-2535b949279f",
+  "validFrom": "2025-03-10T10:00:00Z",
+  "issuer": "did:web:nordicswell.example.com",
+  "credentialSubject": {
+    "type": "CommercialInvoice",
+    "purchaseOrderNumber": "PO-2025-001",
+    "contractNumber": "CTR-2025-SURF-001",
+    "invoiceNumber": "INV-2025-031-001",
+    "invoiceType": "Commercial Invoice",
+    "currency": "USD",
+    "issueDate": "2025-03-10",
+    "invoiceDate": "2025-03-10",
+    "paymentDueDate": "2025-04-10",
+    "deliveryDate": "2025-03-11",
+    "billOfLadingNumber": "POSL-2025-001234",
+    "shippingMarks": "SURFPRO/WRS/001-006",
+    "letterOfCreditNumber": "LC-2025-AU-456789",
+    "portOfEntry": {
+      "unLocode": "AUSYD",
+      "portName": "Sydney (Port Botany)"
+    },
+    "destinationCountry": "AU",
+    "buyer": {
+      "type": "Party",
+      "id": "did:web:waveridersupplies.example.com",
+      "name": "Wave Rider Supplies Pty Ltd",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "18 Harbord Road",
+        "addressLocality": "Brookvale",
+        "addressRegion": "NSW",
+        "postalCode": "2100",
+        "addressCountry": "AU"
+      }
+    },
+    "invoicee": {
+      "type": "Party",
+      "id": "did:web:waveridersupplies.example.com",
+      "name": "Wave Rider Supplies Pty Ltd",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "18 Harbord Road",
+        "addressLocality": "Brookvale",
+        "addressRegion": "NSW",
+        "postalCode": "2100",
+        "addressCountry": "AU"
+      }
+    },
+    "consignee": {
+      "type": "Party",
+      "id": "did:web:waveridersupplies.example.com",
+      "name": "Wave Rider Supplies Pty Ltd",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "18 Harbord Road",
+        "addressLocality": "Brookvale",
+        "addressRegion": "NSW",
+        "postalCode": "2100",
+        "addressCountry": "AU"
+      }
+    },
+    "sellersBank": {
+      "type": "Party",
+      "id": "did:web:nordictradebank.example.com",
+      "name": "Nordic Trade Bank A/S",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "Strandgade 40",
+        "addressLocality": "Copenhagen",
+        "addressRegion": "Hovedstaden",
+        "postalCode": "1401",
+        "addressCountry": "DK"
+      }
+    },
+    "seller": {
+      "type": "Party",
+      "id": "did:web:nordicswell.example.com",
+      "name": "Nordic Swell ApS",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "Ørhagevej 12",
+        "addressLocality": "Klitmøller",
+        "addressRegion": "Nordjylland",
+        "postalCode": "7700",
+        "addressCountry": "DK"
+      }
+    },
+    "sellerBankAccountNumber": "DK5000400440116243",
+    "originalLoadingLocation": {
+      "type": "Location",
+      "name": "Cat Lai Port",
+      "postalAddress": {
+        "type": "Address",
+        "addressLocality": "Ho Chi Minh City",
+        "addressCountry": "VN"
+      },
+      "unLocode": "VNCLI"
+    },
+    "originCountry": "VN",
+    "tradeTermsConditionsDescription": "CIF Port Botany, Sydney (Incoterms® 2020)",
+    "tradeTermsConditionsCode": "CIF",
+    "paymentTerms": "Documentary credit, payable 30 days after bill of lading date",
+    "paymentMethod": "Documentary credit",
+    "itemsShipped": [
+      {
+        "type": "TradeLineItem",
+        "lineId": "1",
+        "product": {
+          "type": "Product",
+          "id": "urn:uuid:surf-001-longboard",
+          "name": "Professional Longboard - Ocean Series",
+          "description": "High-performance longboard with premium bamboo core and fiberglass construction, 9'6\" length"
+        },
+        "sku": "SURF-LB-001",
+        "itemCount": 25,
+        "netWeight": {
+          "type": "Quantity",
+          "amount": 187.5,
+          "unit": "KGS"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 200,
+          "unit": "KGS"
+        },
+        "unitPrice": {
+          "type": "MonetaryAmount",
+          "amount": 750,
+          "currency": "USD"
+        },
+        "commodity": "950629",
+        "lineTotal": {
+          "type": "MonetaryAmount",
+          "amount": 18750,
+          "currency": "USD"
+        }
+      },
+      {
+        "type": "TradeLineItem",
+        "lineId": "2",
+        "product": {
+          "type": "Product",
+          "id": "urn:uuid:surf-002-shortboard",
+          "name": "Performance Shortboard - Pro Series",
+          "description": "Competition-grade shortboard with carbon fiber reinforcement, 6'2\" length"
+        },
+        "sku": "SURF-SB-002",
+        "itemCount": 50,
+        "netWeight": {
+          "type": "Quantity",
+          "amount": 150,
+          "unit": "KGS"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 165,
+          "unit": "KGS"
+        },
+        "unitPrice": {
+          "type": "MonetaryAmount",
+          "amount": 650,
+          "currency": "USD"
+        },
+        "commodity": "950629",
+        "lineTotal": {
+          "type": "MonetaryAmount",
+          "amount": 32500,
+          "currency": "USD"
+        }
+      },
+      {
+        "type": "TradeLineItem",
+        "lineId": "3",
+        "product": {
+          "type": "Product",
+          "id": "urn:uuid:surf-003-fins",
+          "name": "Surfboard Fin Set - Thruster",
+          "description": "Professional thruster fin set with honeycomb construction"
+        },
+        "sku": "SURF-FIN-003",
+        "itemCount": 100,
+        "netWeight": {
+          "type": "Quantity",
+          "amount": 25,
+          "unit": "KGS"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 30,
+          "unit": "KGS"
+        },
+        "unitPrice": {
+          "type": "MonetaryAmount",
+          "amount": 85,
+          "currency": "USD"
+        },
+        "commodity": "950629",
+        "lineTotal": {
+          "type": "MonetaryAmount",
+          "amount": 8500,
+          "currency": "USD"
+        }
+      },
+      {
+        "type": "TradeLineItem",
+        "lineId": "4",
+        "product": {
+          "type": "Product",
+          "id": "urn:uuid:surf-004-wetsuit",
+          "name": "Premium Wetsuit - 3/2mm",
+          "description": "High-quality neoprene wetsuit with sealed seams, 3/2mm thickness"
+        },
+        "sku": "SURF-WS-004",
+        "itemCount": 75,
+        "netWeight": {
+          "type": "Quantity",
+          "amount": 112.5,
+          "unit": "KGS"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 125,
+          "unit": "KGS"
+        },
+        "unitPrice": {
+          "type": "MonetaryAmount",
+          "amount": 180,
+          "currency": "USD"
+        },
+        "commodity": "950629",
+        "lineTotal": {
+          "type": "MonetaryAmount",
+          "amount": 13500,
+          "currency": "USD"
+        }
+      }
+    ],
+    "subtotal": {
+      "type": "MonetaryAmount",
+      "amount": 73250,
+      "currency": "USD"
+    },
+    "freightCost": {
+      "type": "MonetaryAmount",
+      "amount": 1250,
+      "currency": "USD"
+    },
+    "insuranceCost": {
+      "type": "MonetaryAmount",
+      "amount": 366.25,
+      "currency": "USD"
+    },
+    "allowanceCharges": [
+      {
+        "type": "Discount",
+        "description": "Volume discount",
+        "amount": {
+          "type": "MonetaryAmount",
+          "amount": 500,
+          "currency": "USD"
+        }
+      }
+    ],
+    "taxes": [
+      {
+        "description": "Export of goods: no tax charged on the invoice",
+        "rate": 0,
+        "taxableAmount": {
+          "type": "MonetaryAmount",
+          "amount": 74366.25,
+          "currency": "USD"
+        },
+        "taxAmount": {
+          "type": "MonetaryAmount",
+          "amount": 0,
+          "currency": "USD"
+        }
+      }
+    ],
+    "totalAmount": {
+      "type": "MonetaryAmount",
+      "amount": 74366.25,
+      "currency": "USD"
+    }
+  }
+}

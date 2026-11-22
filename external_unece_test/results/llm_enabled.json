@@ -1,0 +1,289 @@
+{
+  "status": "red",
+  "summary": {
+    "checks": 42,
+    "passed": 40,
+    "flags": 2,
+    "critical": 2,
+    "review": 0,
+    "processing_ms": 58625.0,
+    "rule_check_ms": 31.8
+  },
+  "invoice_fields": {
+    "invoice_number": "INV-2025-031-001",
+    "invoice_date": "2025-03-10",
+    "po_number": "PO-2025-001",
+    "consignee": "Wave Rider Supplies Pty Ltd",
+    "description": "Professional Longboard - Ocean Series; Performance Shortboard - Pro Series; Surfboard Fin Set - Thruster; Premium Wetsuit - 3/2mm",
+    "quantity": "250",
+    "gross_kg": "520",
+    "net_kg": "475",
+    "origin": "VN",
+    "hs_code": "950629",
+    "total_value_usd": "74366.25"
+  },
+  "packing_fields": {
+    "invoice_number": "INV-2025-031-001",
+    "po_number": "PO-2025-001",
+    "consignee": "Wave Rider Supplies Pty Ltd",
+    "description": "Professional Longboard - Ocean Series; Performance Shortboard - Pro Series; Surfboard Fin Set - Thruster; Premium Wetsuit - 3/2mm",
+    "quantity": "250",
+    "cartons": "6",
+    "gross_kg": "520",
+    "net_kg": "475",
+    "origin": "VN",
+    "hs_code": "950629"
+  },
+  "comparisons": [
+    {
+      "field": "invoice_number",
+      "label": "Invoice number",
+      "invoice": "INV-2025-031-001",
+      "packing": "INV-2025-031-001",
+      "status": "match",
+      "similarity": null,
+      "method": "exact/rule"
+    },
+    {
+      "field": "po_number",
+      "label": "Purchase order",
+      "invoice": "PO-2025-001",
+      "packing": "PO-2025-001",
+      "status": "match",
+      "similarity": null,
+      "method": "exact/rule"
+    },
+    {
+      "field": "quantity",
+      "label": "Quantity (pcs)",
+      "invoice": "250",
+      "packing": "250",
+      "status": "match",
+      "similarity": null,
+      "method": "exact/rule"
+    },
+    {
+      "field": "gross_kg",
+      "label": "Gross weight (kg)",
+      "invoice": "520",
+      "packing": "520",
+      "status": "match",
+      "similarity": null,
+      "method": "exact/rule"
+    },
+    {
+      "field": "net_kg",
+      "label": "Net weight (kg)",
+      "invoice": "475",
+      "packing": "475",
+      "status": "match",
+      "similarity": null,
+      "method": "exact/rule"
+    },
+    {
+      "field": "origin",
+      "label": "Country of origin",
+      "invoice": "VN",
+      "packing": "VN",
+      "status": "match",
+      "similarity": null,
+      "method": "exact/rule"
+    },
+    {
+      "field": "hs_code",
+      "label": "HS code",
+      "invoice": "950629",
+      "packing": "950629",
+      "status": "match",
+      "similarity": null,
+      "method": "exact/rule"
+    },
+    {
+      "field": "consignee",
+      "label": "Consignee",
+      "invoice": "Wave Rider Supplies Pty Ltd",
+      "packing": "Wave Rider Supplies Pty Ltd",
+      "status": "match",
+      "similarity": null,
+      "method": "exact/rule"
+    },
+    {
+      "field": "description",
+      "label": "Product description",
+      "invoice": "Professional Longboard - Ocean Series; Performance Shortboard - Pro Series; Surfboard Fin Set - Thruster; Premium Wetsuit - 3/2mm",
+      "packing": "Professional Longboard - Ocean Series; Performance Shortboard - Pro Series; Surfboard Fin Set - Thruster; Premium Wetsuit - 3/2mm",
+      "status": "match",
+      "similarity": 1.0,
+      "method": "normalised text"
+    }
+  ],
+  "issues": [
+    {
+      "severity": "red",
+      "code": "MISSING_REQUIRED_FIELD",
+      "field": "cartons",
+      "label": "Cartons",
+      "detail": "Invoice is missing cartons.",
+      "action": "Check the original invoice or enter the missing information.",
+      "invoice_value": null,
+      "packing_value": null,
+      "confidence": null
+    },
+    {
+      "severity": "red",
+      "code": "DRAFT_DOCUMENT_MISMATCH",
+      "field": "consignee",
+      "label": "Draft bill of lading: Consignee",
+      "detail": "Draft bill of lading differs from the reference document for Consignee.",
+      "action": "Compare both original documents and confirm the correct field before finalising.",
+      "invoice_value": "Wave Rider Supplies Pty Ltd",
+      "packing_value": "Pacific Trade Bank Ltd",
+      "confidence": null
+    }
+  ],
+  "metadata": {
+    "source": "UNECE UNVTD published fictional sample: lossy, aggregated text projection from original JSON",
+    "raw_json_extraction_evaluated": false,
+    "input_document_count": 4
+  },
+  "limitations": [
+    "Prototype only: does not issue or legally approve trade documents.",
+    "Supports one product line per document; multi-line invoices need further development.",
+    "PDF text layer required; image-only scanned PDFs need OCR, not yet included.",
+    "No live company, carrier, customs or certificate-of-origin integration.",
+    "NLP similarity is a baseline, not a trained model of customs/legal equivalence.",
+    "Draft bill of lading and certificate of origin: field-consistency checks only; no authenticity, HS, tariff, or rules-of-origin determination.",
+    "LLM fields are evidence-checked suggestions, not verified facts. A human must confirm extracted values against original documents."
+  ],
+  "extra_fields": {
+    "bol": {
+      "consignee": "Pacific Trade Bank Ltd",
+      "description": "Professional Longboard - Ocean Series; Performance Shortboard - Pro Series; Surfboard Fin Set - Thruster; Premium Wetsuit - 3/2mm",
+      "quantity": "250",
+      "cartons": "6",
+      "gross_kg": "520"
+    },
+    "coo": {
+      "invoice_number": "INV-2025-031-001",
+      "consignee": "Wave Rider Supplies Pty Ltd",
+      "description": "Professional Longboard - Ocean Series, 9'6\" length; Performance Shortboard - Pro Series, 6'2\" length; Surfboard Fin Set - Thruster; Premium Wetsuit - 3/2mm",
+      "quantity": "250",
+      "origin": "VN"
+    }
+  },
+  "extra_comparisons": [
+    {
+      "document": "Draft bill of lading",
+      "field": "consignee",
+      "label": "Consignee",
+      "reference_source": "Invoice",
+      "reference": "Wave Rider Supplies Pty Ltd",
+      "document_value": "Pacific Trade Bank Ltd",
+      "status": "mismatch",
+      "similarity": null
+    },
+    {
+      "document": "Draft bill of lading",
+      "field": "description",
+      "label": "Product description",
+      "reference_source": "Invoice",
+      "reference": "Professional Longboard - Ocean Series; Performance Shortboard - Pro Series; Surfboard Fin Set - Thruster; Premium Wetsuit - 3/2mm",
+      "document_value": "Professional Longboard - Ocean Series; Performance Shortboard - Pro Series; Surfboard Fin Set - Thruster; Premium Wetsuit - 3/2mm",
+      "status": "match",
+      "similarity": 1.0
+    },
+    {
+      "document": "Draft bill of lading",
+      "field": "quantity",
+      "label": "Quantity (pcs)",
+      "reference_source": "Invoice",
+      "reference": "250",
+      "document_value": "250",
+      "status": "match",
+      "similarity": null
+    },
+    {
+      "document": "Draft bill of lading",
+      "field": "cartons",
+      "label": "Cartons",
+      "reference_source": "Packing list",
+      "reference": "6",
+      "document_value": "6",
+      "status": "match",
+      "similarity": null
+    },
+    {
+      "document": "Draft bill of lading",
+      "field": "gross_kg",
+      "label": "Gross weight (kg)",
+      "reference_source": "Invoice",
+      "reference": "520",
+      "document_value": "520",
+      "status": "match",
+      "similarity": null
+    },
+    {
+      "document": "Draft certificate of origin",
+      "field": "invoice_number",
+      "label": "Invoice number",
+      "reference_source": "Invoice",
+      "reference": "INV-2025-031-001",
+      "document_value": "INV-2025-031-001",
+      "status": "match",
+      "similarity": null
+    },
+    {
+      "document": "Draft certificate of origin",
+      "field": "consignee",
+      "label": "Consignee",
+      "reference_source": "Invoice",
+      "reference": "Wave Rider Supplies Pty Ltd",
+      "document_value": "Wave Rider Supplies Pty Ltd",
+      "status": "match",
+      "similarity": null
+    },
+    {
+      "document": "Draft certificate of origin",
+      "field": "description",
+      "label": "Product description",
+      "reference_source": "Invoice",
+      "reference": "Professional Longboard - Ocean Series; Performance Shortboard - Pro Series; Surfboard Fin Set - Thruster; Premium Wetsuit - 3/2mm",
+      "document_value": "Professional Longboard - Ocean Series, 9'6\" length; Performance Shortboard - Pro Series, 6'2\" length; Surfboard Fin Set - Thruster; Premium Wetsuit - 3/2mm",
+      "status": "match",
+      "similarity": 0.87
+    },
+    {
+      "document": "Draft certificate of origin",
+      "field": "origin",
+      "label": "Country of origin",
+      "reference_source": "Invoice",
+      "reference": "VN",
+      "document_value": "VN",
+      "status": "match",
+      "similarity": null
+    },
+    {
+      "document": "Draft certificate of origin",
+      "field": "quantity",
+      "label": "Quantity (pcs)",
+      "reference_source": "Invoice",
+      "reference": "250",
+      "document_value": "250",
+      "status": "match",
+      "similarity": null
+    }
+  ],
+  "llm": {
+    "enabled": true,
+    "status": "applied",
+    "model": "qwen2.5:3b",
+    "documents_processed": 4,
+    "added_fields": {
+      "invoice": [],
+      "packing": [],
+      "bol": [],
+      "coo": []
+    },
+    "warning": ""
+  }
+}

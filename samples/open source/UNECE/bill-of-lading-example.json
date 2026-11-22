@@ -1,0 +1,236 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://unvtd.unece.org/bill-of-lading-context.jsonld"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "BillOfLadingCredential"
+  ],
+  "name": "Bill of Lading",
+  "credentialSchema": {
+    "id": "https://unvtd.unece.org/bill-of-lading-schema.json",
+    "type": "JsonSchema"
+  },
+  "id": "urn:uuid:bol-2025-pacific-001",
+  "validFrom": "2025-03-11T10:00:00Z",
+  "validUntil": "2026-03-11T10:00:00Z",
+  "issuer": "did:web:pacificshipping.example.com",
+  "credentialSubject": {
+    "type": "BillOfLading",
+    "billOfLadingNumber": "POSL-2025-001234",
+    "documentIdentifier": "BL-2025-VN-001234",
+    "bookingReferenceNumber": "BKG123456789",
+    "issueDate": "2025-03-11",
+    "consignmentLoadingDate": "2025-03-11",
+    "estimatedTimeOfDeparture": "2025-03-12T08:00:00Z",
+    "estimatedTimeOfArrival": "2025-03-24T06:00:00Z",
+    "consignor": {
+      "type": "Party",
+      "id": "did:web:surfpro.example.com",
+      "name": "SurfPro Manufacturing Vietnam Co., Ltd",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "Lot C5, VSIP II Industrial Park",
+        "addressLocality": "Thu Dau Mot",
+        "addressRegion": "Binh Duong",
+        "postalCode": "820000",
+        "addressCountry": "VN"
+      }
+    },
+    "consignee": {
+      "type": "Party",
+      "id": "did:web:pacifictradebank.example.com",
+      "name": "Pacific Trade Bank Ltd",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "100 George Street",
+        "addressLocality": "Sydney",
+        "addressRegion": "NSW",
+        "postalCode": "2000",
+        "addressCountry": "AU"
+      }
+    },
+    "notifyParty": {
+      "type": "Party",
+      "id": "did:web:waveridersupplies.example.com",
+      "name": "Wave Rider Supplies Pty Ltd",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "18 Harbord Road",
+        "addressLocality": "Brookvale",
+        "addressRegion": "NSW",
+        "postalCode": "2100",
+        "addressCountry": "AU"
+      }
+    },
+    "carrier": {
+      "type": "Party",
+      "id": "did:web:pacificshipping.example.com",
+      "name": "Pacific Ocean Shipping Lines",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "88 Harbour Street",
+        "addressLocality": "Sydney",
+        "addressRegion": "NSW",
+        "postalCode": "2000",
+        "addressCountry": "AU"
+      }
+    },
+    "freightPayer": {
+      "type": "Party",
+      "id": "did:web:nordicswell.example.com",
+      "name": "Nordic Swell ApS",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "Ørhagevej 12",
+        "addressLocality": "Klitmøller",
+        "addressRegion": "Nordjylland",
+        "postalCode": "7700",
+        "addressCountry": "DK"
+      }
+    },
+    "originalLoadingLocation": {
+      "name": "Cat Lai Port",
+      "addressLocality": "Ho Chi Minh City",
+      "addressCountry": "VN",
+      "unLocode": "VNCLI"
+    },
+    "baseportUnloadingLocation": {
+      "name": "Port Botany",
+      "addressLocality": "Sydney",
+      "addressRegion": "NSW",
+      "addressCountry": "AU",
+      "unLocode": "AUSYD"
+    },
+    "deliveryLocation": {
+      "name": "Sydney Secure Warehousing - Facility A",
+      "streetAddress": "45 Logistics Way",
+      "addressLocality": "Banksmeadow",
+      "addressRegion": "NSW",
+      "postalCode": "2019",
+      "addressCountry": "AU"
+    },
+    "placeOfDeparture": {
+      "name": "Cat Lai Port",
+      "addressLocality": "Ho Chi Minh City",
+      "addressCountry": "VN",
+      "unLocode": "VNCLI"
+    },
+    "arrivalLocation": {
+      "name": "Port Botany",
+      "addressLocality": "Sydney",
+      "addressRegion": "NSW",
+      "addressCountry": "AU",
+      "unLocode": "AUSYD"
+    },
+    "paymentLocation": {
+      "addressLocality": "Ho Chi Minh City",
+      "addressCountry": "VN"
+    },
+    "placeOfIssue": {
+      "addressLocality": "Ho Chi Minh City",
+      "addressCountry": "VN"
+    },
+    "conveyanceReferenceNumber": "PV-025S",
+    "transportMeansIdentifier": "PACIFIC VOYAGER",
+    "transportMeansRegistration": "IMO9876543",
+    "containerSizeAndType": "22G1",
+    "fullOrEmptyContainer": "5",
+    "transportEquipmentIdentifier": "POSU1234567",
+    "sealIdentifier": "SEAL123456",
+    "grossWeight": {
+      "type": "Quantity",
+      "amount": 520,
+      "unit": "KGS"
+    },
+    "volume": {
+      "type": "Quantity",
+      "amount": 4.85,
+      "unit": "CBM"
+    },
+    "numberOfPackages": 6,
+    "descriptionOfGoods": "Surfboards, fins and wetsuits for water sports retail",
+    "consignmentSummaryDescription": "Sports equipment - surfing products",
+    "shippingMarks": "SURFPRO/WRS/001-006",
+    "transportContractConditions": "Subject to carrier's standard terms and conditions",
+    "prepaidAmount": {
+      "type": "MonetaryAmount",
+      "amount": 1250,
+      "currency": "USD"
+    },
+    "collectCharges": {
+      "type": "MonetaryAmount",
+      "amount": 0,
+      "currency": "USD"
+    },
+    "contractNumber": "CTR-2025-SURF-001",
+    "ucr": "VN2025SURF001234",
+    "goods": [
+      {
+        "description": "Professional Longboard - Ocean Series",
+        "hsCode": "950629",
+        "quantity": {
+          "type": "Quantity",
+          "amount": 25,
+          "unit": "Units"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 200,
+          "unit": "KGS"
+        },
+        "packages": 2,
+        "packagingType": "CT"
+      },
+      {
+        "description": "Performance Shortboard - Pro Series",
+        "hsCode": "950629",
+        "quantity": {
+          "type": "Quantity",
+          "amount": 50,
+          "unit": "Units"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 165,
+          "unit": "KGS"
+        },
+        "packages": 2,
+        "packagingType": "CT"
+      },
+      {
+        "description": "Surfboard Fin Set - Thruster",
+        "hsCode": "950629",
+        "quantity": {
+          "type": "Quantity",
+          "amount": 100,
+          "unit": "Units"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 30,
+          "unit": "KGS"
+        },
+        "packages": 1,
+        "packagingType": "CT"
+      },
+      {
+        "description": "Premium Wetsuit - 3/2mm",
+        "hsCode": "950629",
+        "quantity": {
+          "type": "Quantity",
+          "amount": 75,
+          "unit": "Units"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 125,
+          "unit": "KGS"
+        },
+        "packages": 1,
+        "packagingType": "CT"
+      }
+    ]
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "dataset": "UNECE UNVTD example trade (fictional shared shipment)",
+  "dataset_type": "independent public sample, NOT real company records",
+  "provenance": "https://unvtd.unece.org/implementation/example-trade/",
+  "source_files": {
+    "commercial-invoice-example.json": {
+      "sha256": "60c4fffde284d8d1990baf13dcaa8becb294979af21db9fdb2b3eb51e3a83820"
+    },
+    "packing-list-example.json": {
+      "sha256": "a54df851084c16273f8dcd045ac22cf40f51af0c89653d70513ef7bbb31083ff"
+    },
+    "bill-of-lading-example.json": {
+      "sha256": "c6dc0f23b9bfe4eaefae79c04c624fb012a37ef58beda23ef22a3b3d90d2b98c"
+    },
+    "certificate-of-origin-example.json": {
+      "sha256": "fb218e3c9dcaaaf7e2d453b1a78e7ff627d679b8a9429bc9335ae21ecd1afc09"
+    }
+  },
+  "method": "Lossy, explicit aggregate projection from 4 multi-line-item source JSON files into TradeCheck v0.3 labelled text fields",
+  "source_checks": [
+    {
+      "check": "invoice_number",
+      "result": "MATCH",
+      "values": {
+        "invoice": "INV-2025-031-001",
+        "packing": "INV-2025-031-001",
+        "coo": "INV-2025-031-001"
+      },
+      "notes": ""
+    },
+    {
+      "check": "purchase_order",
+      "result": "MATCH",
+      "values": {
+        "invoice": "PO-2025-001",
+        "packing": "PO-2025-001"
+      },
+      "notes": ""
+    },
+    {
+      "check": "bill_of_lading_number",
+      "result": "MATCH",
+      "values": {
+        "invoice": "POSL-2025-001234",
+        "bol": "POSL-2025-001234"
+      },
+      "notes": ""
+    },
+    {
+      "check": "packages",
+      "result": "MATCH",
+      "values": {
+        "packing": 6,
+        "bol": 6,
+        "coo": 6
+      },
+      "notes": ""
+    },
+    {
+      "check": "gross_weight_kg",
+      "result": "MATCH",
+      "values": {
+        "invoice_sum": "520",
+        "packing_header": "520",
+        "packing_packages_sum": "520",
+        "bol": "520",
+        "coo_sum": "520"
+      },
+      "notes": ""
+    },
+    {
+      "check": "net_weight_kg",
+      "result": "MATCH",
+      "values": {
+        "invoice_sum": "475",
+        "packing_header": "475",
+        "packing_packages_sum": "475",
+        "coo_sum": "475"
+      },
+      "notes": ""
+    },
+    {
+      "check": "total_goods_quantity",
+      "result": "MATCH",
+      "values": {
+        "invoice": 250,
+        "packing": 250,
+        "bol": "250",
+        "coo": "250"
+      },
+      "notes": ""
+    },
+    {
+      "check": "origin_country",
+      "result": "MATCH",
+      "values": {
+        "invoice": "VN",
+        "packing": "VN",
+        "coo": "VN"
+      },
+      "notes": ""
+    },
+    {
+      "check": "sku_quantity_SURF-LB-001",
+      "result": "MATCH",
+      "values": {
+        "invoice": 25,
+        "packing": 25
+      },
+      "notes": ""
+    },
+    {
+      "check": "sku_quantity_SURF-SB-002",
+      "result": "MATCH",
+      "values": {
+        "invoice": 50,
+        "packing": 50
+      },
+      "notes": ""
+    },
+    {
+      "check": "sku_quantity_SURF-FIN-003",
+      "result": "MATCH",
+      "values": {
+        "invoice": 100,
+        "packing": 100
+      },
+      "notes": ""
+    },
+    {
+      "check": "sku_quantity_SURF-WS-004",
+      "result": "MATCH",
+      "values": {
+        "invoice": 75,
+        "packing": 75
+      },
+      "notes": ""
+    },
+    {
+      "check": "gross_by_product",
+      "result": "MATCH",
+      "values": {
+        "invoice": "200,165,30,125",
+        "bol": "200,165,30,125",
+        "coo": "200,165,30,125"
+      },
+      "notes": ""
+    },
+    {
+      "check": "invoice_subtotal",
+      "result": "MATCH",
+      "values": {
+        "sum_of_lines": "73250",
+        "invoice_subtotal": "73250"
+      },
+      "notes": ""
+    },
+    {
+      "check": "invoice_total_including_adjustments",
+      "result": "MATCH",
+      "values": {
+        "calculated": "74366.25",
+        "invoice_total": "74366.25"
+      },
+      "notes": ""
+    }
+  ],
+  "important_limitations": [
+    "These summaries are NOT the original JSON; they are derived input projections.",
+    "TradeCheck v0.3 lacks native JSON and multi-line-item support; summary comparisons cannot measure raw JSON extraction accuracy.",
+    "Invoice has no explicit carton-count field: do not silently infer it from packing.",
+    "Bill of lading consignee is Pacific Trade Bank Ltd while invoice consignee is Wave Rider Supplies Pty Ltd; this may be legitimate for documentary-credit shipments, not necessarily an error.",
+    "Country code VN is kept verbatim; TradeCheck normalizes it to Vietnam.",
+    "This dataset is a single fictional shipment, so do not compute or claim real-world model accuracy."
+  ]
+}

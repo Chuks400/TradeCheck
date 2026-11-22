@@ -1,0 +1,223 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://unvtd.unece.org/certificate-of-origin-context.jsonld"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "CertificateOfOriginCredential"
+  ],
+  "name": "Certificate of Origin",
+  "credentialSchema": {
+    "id": "https://unvtd.unece.org/certificate-of-origin-schema.json",
+    "type": "JsonSchema"
+  },
+  "id": "urn:uuid:coo-2025-vn-001234",
+  "validFrom": "2025-03-09T10:00:00Z",
+  "validUntil": "2026-03-09T10:00:00Z",
+  "issuer": "did:web:chamberofcommerce.example.com",
+  "credentialSubject": {
+    "type": "CertificateOfOrigin",
+    "certificateNumber": "COO-2025-VN-001234",
+    "issueDate": "2025-03-09T00:00:00Z",
+    "exporter": {
+      "type": "Party",
+      "id": "did:web:surfpro.example.com",
+      "name": "SurfPro Manufacturing Vietnam Co., Ltd",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "Lot C5, VSIP II Industrial Park",
+        "addressLocality": "Thu Dau Mot",
+        "addressRegion": "Binh Duong",
+        "postalCode": "820000",
+        "addressCountry": "VN"
+      }
+    },
+    "importer": {
+      "type": "Party",
+      "id": "did:web:waveridersupplies.example.com",
+      "name": "Wave Rider Supplies Pty Ltd",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "18 Harbord Road",
+        "addressLocality": "Brookvale",
+        "addressRegion": "NSW",
+        "postalCode": "2100",
+        "addressCountry": "AU"
+      }
+    },
+    "consignee": {
+      "type": "Party",
+      "id": "did:web:waveridersupplies.example.com",
+      "name": "Wave Rider Supplies Pty Ltd",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "18 Harbord Road",
+        "addressLocality": "Brookvale",
+        "addressRegion": "NSW",
+        "postalCode": "2100",
+        "addressCountry": "AU"
+      }
+    },
+    "seller": {
+      "type": "Party",
+      "id": "did:web:nordicswell.example.com",
+      "name": "Nordic Swell ApS",
+      "postalAddress": {
+        "type": "Address",
+        "streetAddress": "Ørhagevej 12",
+        "addressLocality": "Klitmøller",
+        "addressRegion": "Nordjylland",
+        "postalCode": "7700",
+        "addressCountry": "DK"
+      }
+    },
+    "placeOfIssue": {
+      "addressLocality": "Ho Chi Minh City",
+      "addressCountry": "VN"
+    },
+    "originCountry": {
+      "addressCountry": "VN",
+      "name": "Viet Nam"
+    },
+    "exportationCountry": {
+      "addressCountry": "VN",
+      "name": "Viet Nam"
+    },
+    "destinationCountry": {
+      "addressCountry": "AU",
+      "name": "Australia"
+    },
+    "originalLoadingLocation": {
+      "name": "Cat Lai Port",
+      "addressLocality": "Ho Chi Minh City",
+      "addressCountry": "VN",
+      "unLocode": "https://service.unece.org/trade/locode/vn.htm#VNCLI"
+    },
+    "baseportUnloadingLocation": {
+      "name": "Port Botany",
+      "addressLocality": "Sydney",
+      "addressRegion": "NSW",
+      "addressCountry": "AU",
+      "unLocode": "https://service.unece.org/trade/locode/au.htm#AUSYD"
+    },
+    "transportContractNumber": "BKG123456789",
+    "invoiceNumber": "INV-2025-031-001",
+    "contractNumber": "CTR-2025-SURF-001",
+    "issuingAuthority": {
+      "name": "Ho Chi Minh City Chamber of Commerce",
+      "streetAddress": "35 Le Duan Boulevard",
+      "addressLocality": "Ho Chi Minh City",
+      "addressCountry": "VN"
+    },
+    "competentAuthority": {
+      "name": "Ministry of Industry and Trade",
+      "addressCountry": "VN"
+    },
+    "numberOfPackages": 6,
+    "certification": "The undersigned hereby certifies, to the best of our knowledge and belief, that the goods listed in this certificate originate in Viet Nam",
+    "authentication": "Certified and stamped by the Ho Chi Minh City Chamber of Commerce on 2025-03-09",
+    "goods": [
+      {
+        "description": "Professional Longboard - Ocean Series, 9'6\" length",
+        "hsCode": "950629",
+        "quantity": {
+          "type": "Quantity",
+          "amount": 25,
+          "unit": "Units"
+        },
+        "netWeight": {
+          "type": "Quantity",
+          "amount": 187.5,
+          "unit": "KGS"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 200,
+          "unit": "KGS"
+        },
+        "value": {
+          "type": "MonetaryAmount",
+          "amount": 18750,
+          "currency": "USD"
+        },
+        "countryOfOrigin": "VN"
+      },
+      {
+        "description": "Performance Shortboard - Pro Series, 6'2\" length",
+        "hsCode": "950629",
+        "quantity": {
+          "type": "Quantity",
+          "amount": 50,
+          "unit": "Units"
+        },
+        "netWeight": {
+          "type": "Quantity",
+          "amount": 150,
+          "unit": "KGS"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 165,
+          "unit": "KGS"
+        },
+        "value": {
+          "type": "MonetaryAmount",
+          "amount": 32500,
+          "currency": "USD"
+        },
+        "countryOfOrigin": "VN"
+      },
+      {
+        "description": "Surfboard Fin Set - Thruster",
+        "hsCode": "950629",
+        "quantity": {
+          "type": "Quantity",
+          "amount": 100,
+          "unit": "Units"
+        },
+        "netWeight": {
+          "type": "Quantity",
+          "amount": 25,
+          "unit": "KGS"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 30,
+          "unit": "KGS"
+        },
+        "value": {
+          "type": "MonetaryAmount",
+          "amount": 8500,
+          "currency": "USD"
+        },
+        "countryOfOrigin": "VN"
+      },
+      {
+        "description": "Premium Wetsuit - 3/2mm",
+        "hsCode": "950629",
+        "quantity": {
+          "type": "Quantity",
+          "amount": 75,
+          "unit": "Units"
+        },
+        "netWeight": {
+          "type": "Quantity",
+          "amount": 112.5,
+          "unit": "KGS"
+        },
+        "grossWeight": {
+          "type": "Quantity",
+          "amount": 125,
+          "unit": "KGS"
+        },
+        "value": {
+          "type": "MonetaryAmount",
+          "amount": 13500,
+          "currency": "USD"
+        },
+        "countryOfOrigin": "VN"
+      }
+    ]
+  }
+}
