@@ -49,7 +49,7 @@ class LocalLLMReviewTests(unittest.TestCase):
         self.assertEqual("disabled", r["llm"]["status"])
         self.assertEqual(0, r["llm"]["documents_processed"])
 
-    def test_model_is_called_on_four_documents(self):
+    def test_model_is_called_on_every_document(self):
         calls = []
         def fake(text, model):
             calls.append((text, model))
@@ -60,8 +60,8 @@ class LocalLLMReviewTests(unittest.TestCase):
         )
         self.assertEqual("green", r["status"])
         self.assertEqual("applied", r["llm"]["status"])
-        self.assertEqual(4, r["llm"]["documents_processed"])
-        self.assertEqual(4, len(calls))
+        self.assertEqual(5, r["llm"]["documents_processed"])
+        self.assertEqual(5, len(calls))
         self.assertGreaterEqual(r["summary"]["processing_ms"], r["summary"]["rule_check_ms"])
 
     def test_llm_enriches_unlabelled_invoice_reference(self):
@@ -101,6 +101,27 @@ class LocalLLMReviewTests(unittest.TestCase):
         self.assertEqual("red", r["status"])
         self.assertGreaterEqual(r["summary"]["critical"], 2)
         self.assertEqual("applied", r["llm"]["status"])
+
+    def test_llm_value_can_only_support_amber(self):
+        invoice = INVOICE.replace("Cartons: 100", "Packed in 100 cartons")
+        packing = PACKING.replace("Cartons: 100", "Cartons: 92")
+        def fake(text, model):
+            return {"cartons": "100"} if "Packed in 100 cartons" in text else {}
+        r = review_with_local_llm(invoice, packing, use_llm=True, extractor=fake)
+        self.assertEqual("amber", r["status"])
+        item = next(i for i in r["issues"] if i["field"] == "cartons")
+        self.assertEqual("amber", item["severity"])
+        self.assertIn("extracted by the local model", item["detail"])
+        self.assertEqual("llm", r["field_sources"]["invoice"]["cartons"])
+
+    def test_guard_drops_exporter_identical_to_consignee(self):
+        def fake(text, model):
+            if text == INVOICE:
+                return {"exporter": "Harbor Retail USA LLC", "consignee": "Harbor Retail USA LLC"}
+            return {}
+        r = review_with_local_llm(INVOICE, PACKING, use_llm=True, extractor=fake)
+        self.assertNotIn("exporter", r["invoice_fields"])
+        self.assertTrue(any("identical to the consignee" in note for note in r["llm"]["guards"]))
 
     def test_ollama_json_schema_request_local_only(self):
         source = "Unlabelled reference INV-2026-001 and origin China"

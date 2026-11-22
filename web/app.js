@@ -24,7 +24,7 @@
   }
   getSamples();
 
-  [['invoiceFile','invoiceName'],['packingFile','packingName'],['bolFile','bolName'],['cooFile','cooName']].forEach(([input,label]) => {
+  [['invoiceFile','invoiceName'],['packingFile','packingName'],['bolFile','bolName'],['cooFile','cooName'],['declFile','declName']].forEach(([input,label]) => {
     $(input).addEventListener('change', () => { $(label).textContent = $(input).files?.[0]?.name || 'Choose PDF (max 8 MB)'; });
   });
   const toBase64 = async file => {
@@ -46,13 +46,13 @@
     try {
       let data;
       if (activeTab === 'sample') data = {mode:'sample',sample:$('sampleCase').value,extra_case:$('extraCase').value};
-      else if (activeTab === 'text') data = {mode:'text',invoice_text:$('invoiceText').value, packing_text:$('packingText').value,bol_text:$('bolText').value,coo_text:$('cooText').value};
+      else if (activeTab === 'text') data = {mode:'text',invoice_text:$('invoiceText').value, packing_text:$('packingText').value,bol_text:$('bolText').value,coo_text:$('cooText').value,decl_text:$('declText').value};
       else {
         const inv = $('invoiceFile').files?.[0], pack = $('packingFile').files?.[0];
         if (!inv || !pack) throw new Error('Please select both an invoice and a packing list PDF.');
         const [i,p] = await Promise.all([toBase64(inv),toBase64(pack)]);
         data = {mode:'upload',invoice_base64:i,packing_base64:p,invoice_name:inv.name,packing_name:pack.name};
-        for (const kind of ['bol','coo']) {
+        for (const kind of ['bol','coo','decl']) {
           const f = $(kind+'File').files?.[0];
           if (f) {
             data[kind+'_base64'] = await toBase64(f);
@@ -94,6 +94,11 @@
     }
     $('llmStatus').textContent = llmMessage;
     $('llmStatus').className = 'llm-status '+(llm.status === 'applied' ? 'active' : llm.status === 'fallback' ? 'fallback' : '');
+    const addedPerDoc = Object.entries(llm.added_fields || {}).filter(([,fields]) => fields && fields.length);
+    if (addedPerDoc.length) {
+      $('llmAddedFields').textContent = 'Model-extracted fields — ' + addedPerDoc.map(([kind,fields]) => kind + ': ' + fields.join(', ')).join('; ') + '. Confirm them against the originals; findings based only on these values stop at amber.';
+    }
+    $('llmAddedFields').classList.toggle('hidden', !addedPerDoc.length);
     const labels = {green:'GREEN — NO ISSUES DETECTED',amber:'AMBER — HUMAN REVIEW NEEDED',red:'RED — INVESTIGATE BEFORE APPROVAL'};
     const notes = {green:'No problems were detected by the checks available in this prototype. Not a customs approval.',amber:'One or more fields need human confirmation before the documents are finalised.',red:'One or more discrepancies or invalid fields were found. Correct them before finalising.'};
     $('riskLabel').textContent=labels[risk]||risk;
@@ -106,12 +111,13 @@
     $('issueCount').textContent=`${result.issues.length} issue${result.issues.length===1?'':'s'}`;
     if (result.issues.length===0) $('issuesList').innerHTML='<div class="no-issues">✓ No issues detected by the implemented checks. This is not a guarantee that documents are legally correct.</div>';
     else $('issuesList').innerHTML=result.issues.map(it => `<div class="issue ${escapeHtml(it.severity)}"><div class="title"><span>${escapeHtml(it.label)} — ${escapeHtml(it.code.replaceAll('_',' ').toLowerCase())}</span><span class="level">${escapeHtml(it.severity).toUpperCase()}</span></div><p>${escapeHtml(it.detail)}</p><p><strong>Recommended action:</strong> ${escapeHtml(it.action)}</p></div>`).join('');
-    $('compareRows').innerHTML=result.comparisons.map(it => `<tr><td>${escapeHtml(it.label)}</td><td>${escapeHtml(it.invoice)}</td><td>${escapeHtml(it.packing)}</td><td><span class="status ${escapeHtml(it.status)}">${escapeHtml(it.status)}</span></td></tr>`).join('');
+    const rowFlag = (status) => status === 'mismatch' ? 'row-flag-red' : status === 'review' ? 'row-flag-amber' : '';
+    $('compareRows').innerHTML=result.comparisons.map(it => `<tr class="${rowFlag(it.status)}"><td>${escapeHtml(it.label)}</td><td>${escapeHtml(it.invoice)}</td><td>${escapeHtml(it.packing)}</td><td><span class="status ${escapeHtml(it.status)}">${escapeHtml(it.status)}</span></td></tr>`).join('');
     $('invoiceFields').textContent=JSON.stringify(result.invoice_fields,null,2);
     $('packingFields').textContent=JSON.stringify(result.packing_fields,null,2);
     const extra = result.extra_comparisons || [];
     $('extraResults').classList.toggle('hidden', !extra.length);
-    $('extraRows').innerHTML=extra.map(it => `<tr><td>${escapeHtml(it.document)}</td><td>${escapeHtml(it.label)}</td><td>${escapeHtml(it.reference_source)}: ${escapeHtml(it.reference)}</td><td>${escapeHtml(it.document_value)}</td><td><span class="status ${escapeHtml(it.status)}">${escapeHtml(it.status)}</span></td></tr>`).join('');
+    $('extraRows').innerHTML=extra.map(it => `<tr class="${rowFlag(it.status)}"><td>${escapeHtml(it.document)}</td><td>${escapeHtml(it.label)}</td><td>${escapeHtml(it.reference_source)}: ${escapeHtml(it.reference)}</td><td>${escapeHtml(it.document_value)}</td><td><span class="status ${escapeHtml(it.status)}">${escapeHtml(it.status)}</span></td></tr>`).join('');
     $('extraFields').textContent=JSON.stringify(result.extra_fields || {},null,2);
     $('limitations').innerHTML=result.limitations.map(i=>'<li>'+escapeHtml(i)+'</li>').join('');
   }

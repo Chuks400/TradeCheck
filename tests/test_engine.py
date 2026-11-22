@@ -3,7 +3,8 @@ from pathlib import Path
 import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from engine import review_pdfs, review_texts, number, description_similarity
+from engine import (review_pdfs, review_texts, number, description_similarity,
+                    compare_values, measure, parse_document_date)
 from make_samples import OUTPUT
 
 
@@ -65,6 +66,52 @@ class ReviewEngineTests(unittest.TestCase):
     def test_numeric_parser(self):
         self.assertEqual(number('12,000.50 USD'),number('12000.5'))
         self.assertIsNone(number('not a number'))
+
+    def test_unit_spellings_are_read(self):
+        self.assertEqual('match', compare_values('gross_kg', '850 KGS', '850')[0])
+        self.assertEqual((6000, 'pcs'), measure('500 DOZ'))
+        self.assertEqual('match', compare_values('quantity', '500 DOZ', '6000 pcs')[0])
+        # A missing unit must never be assumed for a converting unit.
+        self.assertEqual('review', compare_values('quantity', '500 DOZ', '500')[0])
+        # Valid data in a unit this prototype cannot convert stays a warning.
+        self.assertEqual('review', compare_values('quantity', '5,000 shirts', '5000 pcs')[0])
+
+    def test_company_name_normalisation(self):
+        self.assertEqual('match', compare_values('consignee', 'Harbor Retail USA L.L.C.',
+                                                  'Harbor Retail USA LLC')[0])
+        self.assertEqual('match', compare_values('consignee', 'Harbor  Retail USA, LLC',
+                                                  'Harbor Retail USA LLC')[0])
+        # Ltd and LLC are different entity types: a person decides, no auto-pass.
+        self.assertEqual('review', compare_values('consignee', 'Harbor Retail USA Ltd',
+                                                   'Harbor Retail USA LLC')[0])
+
+    def test_dates_are_not_guessed(self):
+        self.assertEqual((None, 'ambiguous'), parse_document_date('05/11/2026'))
+        self.assertEqual('ok', parse_document_date('18 Nov 2026')[1])
+        self.assertEqual('ok', parse_document_date('2026年11月18日')[1])
+
+    def test_unreadable_value_is_amber_not_red(self):
+        invoice = ('Invoice No: INV-1\nInvoice Date: 2026-11-18\nDescription of Goods: Shorts\n'
+                   'Quantity (pcs): 5000\nCartons: 100\nGross Weight (kg): heavy\n'
+                   'Net Weight (kg): 800\nCountry of Origin: China')
+        packing = invoice.replace('Gross Weight (kg): heavy', 'Gross Weight (kg): 850')
+        r = review_texts(invoice, packing)
+        self.assertEqual('amber', r['status'])
+        self.assertTrue(any(i['code'] == 'UNREADABLE_VALUE' and i['severity'] == 'amber'
+                            for i in r['issues']))
+        self.assertFalse(any(i['code'] == 'INVALID_NUMBER' for i in r['issues']))
+
+    def test_skipped_total_check_is_visible(self):
+        invoice = ('Invoice No: INV-1\nInvoice Date: 2026-11-18\nDescription of Goods: Shorts\n'
+                   'Quantity (pcs): 5000\nUnit Price (USD): N/A\nTotal Value (USD): 22500.00\n'
+                   'Cartons: 100\nGross Weight (kg): 850\nNet Weight (kg): 800\n'
+                   'Country of Origin: China')
+        packing = ('Invoice No: INV-1\nDescription of Goods: Shorts\nQuantity (pcs): 5000\n'
+                   'Cartons: 100\nGross Weight (kg): 850\nNet Weight (kg): 800\n'
+                   'Country of Origin: China')
+        r = review_texts(invoice, packing)
+        self.assertTrue(any(i['code'] == 'CHECK_SKIPPED' and i['severity'] == 'amber'
+                            for i in r['issues']))
 
 if __name__=='__main__':
     unittest.main()

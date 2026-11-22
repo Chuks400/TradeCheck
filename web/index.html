@@ -23,14 +23,14 @@
       <header class="topbar"><span>SUPPLY CHAIN COMPETITION <span class="slash">/</span> TOPIC 2</span><span class="version">MVP v0.3 · NOV 2026</span></header>
       <div class="content">
         <div class="hero">
-          <div class="eyebrow"><span class="mini-line"></span> EXPORT OPERATIONS / QUALITY ASSURANCE</div>
-          <h1>Catch document errors <em>before</em> shipment.</h1>
-          <p>Compare an invoice with a packing list and optionally check draft shipping and origin documents. Flag inconsistencies for a person to review before finalisation.</p>
+          <div class="eyebrow"><span class="mini-line"></span> PRE-ISSUANCE DOCUMENT CONSISTENCY</div>
+          <h1>Catch document errors <em>before</em> they are issued.</h1>
+          <p>Compare an invoice with a packing list and optionally check draft shipping, origin and customs documents. Flag inconsistencies for a person to review before the documents are issued.</p>
           <div class="tags"><span>01 Extraction</span><span>02 Normalisation</span><span>03 Cross-check</span><span>04 Human review</span></div>
         </div>
 
         <section id="workspace" class="panel workspace">
-          <div class="section-head"><div><span class="section-kicker">01 / WORKSPACE</span><h2>Choose document input</h2></div><span class="pill subdued">Two required + two optional</span></div>
+          <div class="section-head"><div><span class="section-kicker">01 / WORKSPACE</span><h2>Choose document input</h2></div><span class="pill subdued">Two required + three optional</span></div>
           <div class="tabbar" role="tablist" aria-label="Document input mode">
             <button type="button" class="tab active" data-tab="sample" role="tab" aria-selected="true">Try demo documents</button>
             <button type="button" class="tab" data-tab="upload" role="tab" aria-selected="false">Upload your PDFs</button>
@@ -42,19 +42,23 @@
             <p id="caseDescription" class="hint">All key fields match; a green result is expected.</p>
             <div class="controlrow"><label for="extraCase">OPTIONAL EXTENDED TEST (FICTIONAL)</label><select id="extraCase">
               <option value="">Invoice and packing list only</option>
-              <option value="clean">Matching draft bill of lading + origin certificate</option>
+              <option value="clean">Matching bill of lading, origin certificate and declaration</option>
               <option value="bol_cartons_error">Incorrect carton count on bill of lading</option>
               <option value="coo_origin_error">Incorrect origin on certificate</option>
               <option value="both_errors">Both draft documents contain an error</option>
+              <option value="decl_hs_error">HS code mismatch on the customs declaration</option>
+              <option value="decl_terms_review">Delivery terms differ on the declaration (CIF vs FOB)</option>
+              <option value="decl_date_error">Declaration date is after the export date</option>
             </select></div>
           </div>
           <div id="tab-upload" class="tabpanel hidden">
             <p class="panel-note">Use text-based PDF documents. Scanned image-only PDFs are not yet supported. Documents are processed in memory on this computer.</p>
             <div class="upload-grid"><label class="file-upload"><span class="file-symbol">▧</span><strong>Commercial invoice</strong><small id="invoiceName">Choose PDF (max 8 MB)</small><input id="invoiceFile" type="file" accept="application/pdf,.pdf" /></label><label class="file-upload"><span class="file-symbol">▤</span><strong>Packing list</strong><small id="packingName">Choose PDF (max 8 MB)</small><input id="packingFile" type="file" accept="application/pdf,.pdf" /></label></div>
-            <p class="panel-note">Optional draft documents (text-based PDFs; you can leave both empty):</p>
-            <div class="upload-grid">
+            <p class="panel-note">Optional draft documents (text-based PDFs; you can leave them empty):</p>
+            <div class="upload-grid three">
               <label class="file-upload"><span class="file-symbol">▤</span><strong>Draft bill of lading</strong><small id="bolName">Optional PDF</small><input id="bolFile" type="file" accept="application/pdf,.pdf" /></label>
               <label class="file-upload"><span class="file-symbol">▤</span><strong>Draft certificate of origin</strong><small id="cooName">Optional PDF</small><input id="cooFile" type="file" accept="application/pdf,.pdf" /></label>
+              <label class="file-upload"><span class="file-symbol">▤</span><strong>Draft customs declaration</strong><small id="declName">Optional PDF (labelled text)</small><input id="declFile" type="file" accept="application/pdf,.pdf" /></label>
             </div>
           </div>
           <div id="tab-text" class="tabpanel hidden">
@@ -64,6 +68,9 @@
             <div class="text-grid">
               <div><label for="bolText">DRAFT BILL OF LADING (OPTIONAL)</label><textarea id="bolText" rows="6" spellcheck="false" placeholder="Invoice No: INV-001&#10;Cartons: 100&#10;Gross Weight (kg): 850"></textarea></div>
               <div><label for="cooText">CERTIFICATE OF ORIGIN DRAFT (OPTIONAL)</label><textarea id="cooText" rows="6" spellcheck="false" placeholder="Invoice No: INV-001&#10;Country of Origin: China"></textarea></div>
+            </div>
+            <div class="text-grid">
+              <div><label for="declText">CUSTOMS DECLARATION DRAFT (OPTIONAL)</label><textarea id="declText" rows="8" spellcheck="false" placeholder="申报日期: 2026-11-15&#10;出口日期: 2026-11-20&#10;商品编号: 6109100000&#10;数量及单位: 5000 pcs&#10;件数: 100&#10;包装种类: 纸箱&#10;成交方式: FOB"></textarea></div>
             </div>
           </div>
           <div class="llm-config">
@@ -82,6 +89,7 @@
           <div id="emptyState" class="empty-state"><div class="empty-icon">▤</div><strong>No review has been run yet</strong><p>Choose a sample or upload documents, then select “Run document checks”.</p></div>
           <div id="reportView" class="hidden">
             <p id="llmStatus" class="llm-status" role="status"></p>
+            <p id="llmAddedFields" class="hint hidden"></p>
             <div id="riskBanner" class="risk-banner"><div><div class="risk-kicker">DOCUMENT STATUS</div><div id="riskLabel" class="risk-label">–</div><p id="riskNote">–</p></div><span class="risk-icon" id="riskIcon">●</span></div>
             <div class="stats"><div class="stat"><span>FIELDS & RULES CHECKED</span><strong id="checks">–</strong></div><div class="stat"><span>CHECKS PASSED</span><strong id="passed">–</strong></div><div class="stat"><span>ISSUES FLAGGED</span><strong id="flags">–</strong></div><div class="stat"><span>PROCESSING TIME</span><strong id="speed">–</strong></div></div>
             <div class="subheading"><h3>Detected issues</h3><span id="issueCount">0 items</span></div><div id="issuesList" class="issues-list"></div>

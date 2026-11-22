@@ -10,8 +10,8 @@
       "actual": "green",
       "status_as_expected": true,
       "flags": 0,
-      "checks": 35,
-      "processing_ms": 0.9,
+      "checks": 36,
+      "processing_ms": 1.2,
       "issue_codes": []
     },
     {
@@ -20,8 +20,8 @@
       "actual": "red",
       "status_as_expected": true,
       "flags": 1,
-      "checks": 35,
-      "processing_ms": 0.2,
+      "checks": 36,
+      "processing_ms": 0.1,
       "issue_codes": [
         "CROSS_DOCUMENT_MISMATCH"
       ]
@@ -32,8 +32,8 @@
       "actual": "red",
       "status_as_expected": true,
       "flags": 1,
-      "checks": 35,
-      "processing_ms": 0.2,
+      "checks": 36,
+      "processing_ms": 0.1,
       "issue_codes": [
         "CROSS_DOCUMENT_MISMATCH"
       ]
@@ -44,8 +44,8 @@
       "actual": "red",
       "status_as_expected": true,
       "flags": 1,
-      "checks": 35,
-      "processing_ms": 0.3,
+      "checks": 36,
+      "processing_ms": 0.1,
       "issue_codes": [
         "CROSS_DOCUMENT_MISMATCH"
       ]
@@ -56,8 +56,8 @@
       "actual": "red",
       "status_as_expected": true,
       "flags": 4,
-      "checks": 35,
-      "processing_ms": 0.4,
+      "checks": 36,
+      "processing_ms": 0.1,
       "issue_codes": [
         "CROSS_DOCUMENT_MISMATCH",
         "CROSS_DOCUMENT_MISMATCH",
@@ -71,8 +71,8 @@
       "actual": "amber",
       "status_as_expected": true,
       "flags": 1,
-      "checks": 35,
-      "processing_ms": 4.2,
+      "checks": 36,
+      "processing_ms": 1.5,
       "issue_codes": [
         "DESCRIPTION_REVIEW"
       ]
@@ -83,8 +83,8 @@
       "actual": "red",
       "status_as_expected": true,
       "flags": 1,
-      "checks": 35,
-      "processing_ms": 0.3,
+      "checks": 36,
+      "processing_ms": 0.1,
       "issue_codes": [
         "INVOICE_TOTAL_ERROR"
       ]

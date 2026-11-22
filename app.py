@@ -75,7 +75,7 @@ class Handler(BaseHTTPRequestHandler):
             elif mode == 'text':
                 invoice = data.get('invoice_text', '')
                 packing = data.get('packing_text', '')
-                extras = {kind: data.get(f'{kind}_text', '') for kind in ('bol', 'coo')
+                extras = {kind: data.get(f'{kind}_text', '') for kind in ('bol', 'coo', 'decl')
                           if str(data.get(f'{kind}_text', '')).strip()}
                 if any(not isinstance(t, str) or len(t) > 150_000 for t in [invoice, packing, *extras.values()]):
                     raise ValueError('Text is too long or invalid.')
@@ -89,7 +89,7 @@ class Handler(BaseHTTPRequestHandler):
                         return base64.b64decode(encoded, validate=True)
                     except (binascii.Error, ValueError):
                         raise ValueError('Invalid PDF data.')
-                extras = {kind: decode(f'{kind}_base64') for kind in ('bol', 'coo')
+                extras = {kind: decode(f'{kind}_base64') for kind in ('bol', 'coo', 'decl')
                           if data.get(f'{kind}_base64')}
                 result = review_with_local_llm(
                     extract_pdf_text(decode('invoice_base64')),

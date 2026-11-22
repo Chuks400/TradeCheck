@@ -2,7 +2,7 @@
 
 **Student competition prototype for Topic 2: AI-Enabled Optimization of International Supply Chain Business Processes.**
 
-TradeCheck checks one **commercial invoice** against one **packing list** before they are finalised, and can optionally compare a **draft bill of lading** and **draft certificate of origin**. It flags differences in quantities, weights, countries of origin, invoice identifiers, and missing key fields. A lightweight NLP similarity model checks whether the two product descriptions appear similar enough or need human review. Results appear in a browser with red/amber/green triage, an issue list, and an exportable comparison report.
+TradeCheck checks one **commercial invoice** against one **packing list** before they are issued, and can optionally compare a **draft bill of lading**, **draft certificate of origin** and **draft customs declaration**. It flags differences in quantities, weights, countries of origin, invoice identifiers, and missing key fields. A lightweight NLP similarity model checks whether the two product descriptions appear similar enough or need human review. Results appear in a browser with red/amber/green triage, an issue list, and an exportable comparison report.
 
 > **Important:** All included sample documents are **fictional** and NOT Shenzhou International's actual shipping documents. The system is a first prototype, not a deployed product or customs-compliance decision tool.
 
@@ -30,11 +30,11 @@ python3 app.py --open
 
 - **Extraction:** Read selectable text from uploaded PDFs (PyMuPDF).
 - **Normalisation:** Standardise invoice IDs, decimal numbers and a small set of country names.
-- **Document comparison:** Match invoice number, PO reference, quantity, cartons, gross/net weight, origin, HS number, consignee and product description.
+- **Document comparison:** Match invoice number, PO reference, quantity, cartons, gross/net weight, origin, HS number, consignee, currency, delivery terms and product description.
 - **Basic rules:** Check invoice total = quantity × unit price and gross weight >= net weight.
 - **Completeness:** Flag missing required fields.
-- **Triage:** Red = clear mismatch or invalid field; amber = needs human interpretation; green = none of the implemented checks detected an issue.
-- **Optional draft documents:** Detect shared-field inconsistencies in bills of lading and certificates of origin; these are advisory comparisons, not legal checks.
+- **Triage:** Red = clear mismatch or invalid field; amber = needs human interpretation or could not be read; green = none of the implemented checks detected an issue.
+- **Optional draft documents:** Detect shared-field inconsistencies in bills of lading, certificates of origin and customs declarations; these are advisory comparisons, not legal checks.
 - **Exports:** Download JSON review record or a CSV of comparison results, including optional draft comparisons.
 
 ### Is it AI?
@@ -98,9 +98,9 @@ The Python backend sends document text to **127.0.0.1:11434** (the local Ollama 
 
 ## Optional draft-document checks (v0.2)
 
-Under **Try demo documents**, choose an additional fictional scenario to test a correct draft bundle, a wrong carton count on the bill of lading, or an incorrect origin in the draft certificate. The original seven invoice/packing list PDF examples remain unchanged. The optional demo drafts are **generated as fictional labelled text** inside `extended_review.py`.
+Under **Try demo documents**, choose an additional fictional scenario to test a correct draft bundle, a wrong carton count on the bill of lading, an incorrect origin in the draft certificate, or a customs declaration with a wrong HS code, different delivery terms, or a declaration date after the export date. The original seven invoice/packing list PDF examples remain unchanged. The optional demo drafts are **generated as fictional labelled text** inside `extended_review.py`.
 
-Under **Upload your PDFs**, the bill of lading and certificate are optional. They must be text-based PDFs. The engine compares fields present in both documents; it does **not** decide certificate authenticity, tariff eligibility, final origin, or legal compliance. An unknown field or unusual layout can still need a manual review.
+Under **Upload your PDFs**, the bill of lading, certificate and customs declaration are optional. They must be text-based PDFs whose fields appear as `Label: value` lines; `samples/declaration_draft.pdf` is a fictional example with Chinese labels. The engine compares fields present in both documents; it does **not** decide certificate authenticity, tariff eligibility, final origin, or legal compliance. HS codes are compared on the first six digits only, and an unknown field or unusual layout (such as a real declaration printed as a colon-free table) is flagged for manual review rather than silently approved.
 
 ## Measured competition experiment
 
@@ -122,6 +122,7 @@ Review **the same 7 document pairs** manually and record who spotted which known
 - **PDF text layer required:** image-only scanned PDFs require OCR, which is not included in this MVP.
 - **Template-aware parser:** the sample PDF format is supported; arbitrary real-world layouts need expanded extraction or OCR.
 - **Optional drafts:** Basic field comparisons only; no authenticated documents or binding legal rulings.
+- **Declaration scope:** The draft declaration is compared on shared fields, declaration date vs export date, and the first six HS digits. Statutory units, packaging codes, customs release and duty calculation are outside the tested MVP.
 - **No customs rules:** HS classification, origin eligibility, tariffs, expiring certificates and document issuance are outside the tested MVP.
 - **No live integrations:** the project does not connect to Shenzhou, its customers, banks, customs, or carriers.
 - **No proof of Shenzhou's internal deficiency:** the public company data supports why export operations matter, not that Shenzhou has a high document-error rate.

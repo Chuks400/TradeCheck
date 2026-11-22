@@ -25,7 +25,9 @@ BASE = {
     'gross_kg': '850.0',
     'net_kg': '800.0',
     'unit_price_usd': '4.50',
-    'total_value_usd': '22500.00'
+    'total_value_usd': '22500.00',
+    'currency': 'USD',
+    'terms': 'FOB',
 }
 
 CASES = [
@@ -43,6 +45,7 @@ INVOICE_FIELDS = [
     ('Consignee', 'consignee'), ('Purchase Order', 'po_number'), ('Description of Goods', 'description'),
     ('HS Code', 'hs_code'), ('Country of Origin', 'origin'), ('Quantity (pcs)', 'quantity'),
     ('Unit Price (USD)', 'unit_price_usd'), ('Total Value (USD)', 'total_value_usd'),
+    ('Currency', 'currency'), ('Terms of Delivery', 'terms'),
     ('Cartons', 'cartons'), ('Gross Weight (kg)', 'gross_kg'), ('Net Weight (kg)', 'net_kg'),
 ]
 PACKING_FIELDS = [
@@ -80,13 +83,54 @@ def make_doc(path, kind, fields):
     doc.build(flow)
 
 
+def make_declaration(path):
+    """One fictional declaration draft so the optional PDF upload can be tried."""
+    from reportlab.pdfgen import canvas
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+    pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
+    lines = [
+        ('申报日期', '2026-11-15'),
+        ('出口日期', '2026-11-20'),
+        ('境内发货人', BASE['exporter']),
+        ('境外收货人', BASE['consignee']),
+        ('合同协议号', BASE['po_number']),
+        ('商品编号', '6109100000'),
+        ('商品名称及规格型号', BASE['description']),
+        ('数量及单位', f"{BASE['quantity']} pcs"),
+        ('件数', BASE['cartons']),
+        ('包装种类', '纸箱'),
+        ('毛重（千克）', BASE['gross_kg']),
+        ('净重（千克）', BASE['net_kg']),
+        ('原产国（地区）', BASE['origin']),
+        ('总价', f"{BASE['total_value_usd']} USD"),
+        ('币制', BASE['currency']),
+        ('成交方式', BASE['terms']),
+    ]
+    doc = canvas.Canvas(str(path), pagesize=A4, invariant=1)
+    doc.setFont('Helvetica-Bold', 17)
+    doc.drawString(24 * mm, A4[1] - 25 * mm, 'CUSTOMS DECLARATION DRAFT')
+    doc.setFont('Helvetica-Bold', 9)
+    doc.drawString(24 * mm, A4[1] - 32 * mm, 'SYNTHETIC SAMPLE - NOT SHENZHOU INTERNATIONAL DATA')
+    doc.setFont('STSong-Light', 11)
+    y = A4[1] - 45 * mm
+    for label, value in lines:
+        doc.drawString(24 * mm, y, f'{label}: {value}')
+        y -= 8 * mm
+    doc.setFont('Helvetica', 8)
+    doc.drawString(24 * mm, 20 * mm, 'Fictional test data for the Topic 2 prototype.')
+    doc.showPage()
+    doc.save()
+
+
 def generate():
     for case in CASES:
         inv = {**BASE, **case['changes_invoice']}
         pack = {**BASE, **case['changes_packing']}
         make_doc(OUTPUT / f"{case['id']}_invoice.pdf", 'Commercial Invoice', inv)
         make_doc(OUTPUT / f"{case['id']}_packing.pdf", 'Packing List', pack)
-    print(f'Generated {2*len(CASES)} fictional PDFs in {OUTPUT}')
+    make_declaration(OUTPUT / 'declaration_draft.pdf')
+    print(f'Generated {2*len(CASES)} invoice/packing PDFs and 1 declaration draft in {OUTPUT}')
 
 if __name__ == '__main__':
     generate()
