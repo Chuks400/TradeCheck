@@ -193,15 +193,33 @@ def _apply_guards(fields: dict[str, str]) -> tuple[dict[str, str], list[str]]:
     return fields, notes
 
 
-def _cap_llm_severity(result: dict, llm_fields: set[str]) -> bool:
-    """A value the model added can support a warning, never a hard error."""
+def _cap_llm_severity(result: dict, added_fields: dict[str, list[str]]) -> bool:
+    """Only soften a hard error if its actual source document used an LLM value.
+
+    A missing field remains a missing field even if the model found the same
+    field name in another document. Cross-document comparisons depend on both
+    sides; arithmetic and weight checks may depend on several fields.
+    """
+    llm_sources = {kind: set(fields) for kind, fields in added_fields.items()}
+    dependent_fields = {
+        "WEIGHT_RULE": ("gross_kg", "net_kg"),
+        "INVOICE_TOTAL_ERROR": ("quantity", "unit_price_usd", "total_value_usd"),
+    }
     changed = False
     for item in result.get("issues", []):
-        if item.get("field") in llm_fields and item.get("severity") == "red":
-            item["severity"] = "amber"
-            item["detail"] += (" This value was extracted by the local model; "
-                               "confirm it against the original document.")
-            changed = True
+        if item.get("severity") != "red":
+            continue
+        if item.get("code") in ("MISSING_REQUIRED_FIELD", "NO_EXTRACTABLE_TEXT"):
+            continue
+        fields = dependent_fields.get(item.get("code"), (item.get("field"),))
+        source_documents = item.get("source_documents", ())
+        if not any(field in llm_sources.get(kind, set())
+                   for kind in source_documents for field in fields):
+            continue
+        item["severity"] = "amber"
+        item["detail"] += (" This value was extracted by the local model; "
+                           "confirm it against the original document.")
+        changed = True
     if changed:
         result["summary"]["critical"] = sum(i["severity"] == "red" for i in result["issues"])
         result["summary"]["review"] = sum(i["severity"] == "amber" for i in result["issues"])
@@ -269,8 +287,7 @@ def review_with_local_llm(
     )
     # Values the model added are evidence-checked suggestions, so any mismatch
     # that depends on one of them can only be a warning, never a hard error.
-    llm_fields = {field for fields in status["added_fields"].values() for field in fields}
-    _cap_llm_severity(result, llm_fields)
+    _cap_llm_severity(result, status["added_fields"])
     result["field_sources"] = {
         kind: {field: "llm" for field in fields}
         for kind, fields in status["added_fields"].items() if fields

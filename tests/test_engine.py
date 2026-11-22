@@ -85,6 +85,16 @@ class ReviewEngineTests(unittest.TestCase):
         self.assertEqual('review', compare_values('consignee', 'Harbor Retail USA Ltd',
                                                    'Harbor Retail USA LLC')[0])
 
+    def test_po_label_not_confused_with_identifier(self):
+        # The Packlistly draft adds a separate PO label before the same ID.
+        self.assertEqual('match', compare_values('po_number', 'BW-4471', 'PO BW-4471')[0])
+        self.assertEqual('match', compare_values('po_number', 'BW-4471', 'P.O. BW-4471')[0])
+        self.assertEqual('match', compare_values('po_number', 'BW-4471', 'PO No. BW-4471')[0])
+        self.assertEqual('match', compare_values('po_number', 'BW-4471', 'PO:BW-4471')[0])
+        self.assertEqual('mismatch', compare_values('po_number', 'BW-4471', 'PO BW-9999')[0])
+        # PO-44881 can be part of an actual identifier: never strip it.
+        self.assertEqual('mismatch', compare_values('po_number', 'PO-44881', '44881')[0])
+
     def test_dates_are_not_guessed(self):
         self.assertEqual((None, 'ambiguous'), parse_document_date('05/11/2026'))
         self.assertEqual('ok', parse_document_date('18 Nov 2026')[1])
