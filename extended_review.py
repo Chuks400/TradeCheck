@@ -134,6 +134,7 @@ def review_bundle_texts(
                 "label": name, "detail": f"Could not extract labelled fields from {name}.",
                 "action": "Inspect this draft manually; scanned PDFs require OCR.",
                 "invoice_value": None, "packing_value": None, "confidence": None,
+                "source_documents": [kind],
             })
             result["summary"]["checks"] += 1
             continue
@@ -151,6 +152,7 @@ def review_bundle_texts(
             else:
                 baseline = invoice.get(field) or packing.get(field)
                 reference_source = "Invoice" if invoice.get(field) else "Packing list"
+                ref_kind = "invoice" if invoice.get(field) else "packing"
             if not baseline:
                 continue
             if kind == "decl" and field == "cartons" and not _is_carton_packaging(fields.get("packaging")):
@@ -162,6 +164,7 @@ def review_bundle_texts(
                     "detail": "The declared packaging kind is not cartons, so the packing-list carton count was not compared.",
                     "action": "Confirm the packaging kind and the corresponding package count by hand.",
                     "invoice_value": baseline, "packing_value": observed, "confidence": None,
+                    "source_documents": [ref_kind, kind],
                 })
                 continue
             result["summary"]["checks"] += 1
@@ -210,7 +213,7 @@ def review_bundle_texts(
                 "detail": detail,
                 "action": "Compare both original documents and confirm the correct field before finalising.",
                 "invoice_value": baseline, "packing_value": observed,
-                "confidence": similarity,
+                "confidence": similarity, "source_documents": [ref_kind, kind],
             })
 
         if kind == "decl":
@@ -228,6 +231,7 @@ def review_bundle_texts(
                         "detail": "A date on the declaration could be read in more than one order and was not guessed.",
                         "action": "Confirm the declaration and export dates against the original.",
                         "invoice_value": raw_exported, "packing_value": raw_declared, "confidence": None,
+                        "source_documents": [kind],
                     })
                 elif declared is None or exported is None:
                     result["issues"].append({
@@ -237,6 +241,7 @@ def review_bundle_texts(
                         "detail": "The declaration date or the export date could not be read.",
                         "action": "Confirm both dates by hand; the declaration must not post-date the export.",
                         "invoice_value": raw_exported, "packing_value": raw_declared, "confidence": None,
+                        "source_documents": [kind],
                     })
                 elif declared > exported:
                     result["issues"].append({
@@ -246,6 +251,7 @@ def review_bundle_texts(
                         "detail": "The declaration date is later than the export date.",
                         "action": "Correct the dates; a declaration cannot be made after the goods leave.",
                         "invoice_value": raw_exported, "packing_value": raw_declared, "confidence": None,
+                        "source_documents": [kind],
                     })
                 else:
                     result["summary"]["passed"] += 1

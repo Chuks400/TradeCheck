@@ -314,7 +314,15 @@ def clean_value(field: str, value: str | None) -> Any:
         if s in ("kh", "cambodia"):
             return "cambodia"
         return s
-    if field in ("invoice_number", "po_number", "hs_code"):
+    if field == "po_number":
+        # "PO BW-4471" or "PO No. BW-4471" has a label, not a different ID.
+        # Preserve real identifiers such as "PO-44881" (no separating label).
+        value = re.sub(
+            r"^\s*P\.?\s*O\.?(?:\s+(?:No\.?|Number))?(?:\s*[:#]\s*|\s+)",
+            "", value, flags=re.IGNORECASE,
+        )
+        return re.sub(r"[\s\-]", "", value).upper()
+    if field in ("invoice_number", "hs_code"):
         return re.sub(r"[\s\-]", "", value).upper()
     if field == "currency":
         s = re.sub(r"\s+", " ", value.strip().upper())
@@ -355,22 +363,26 @@ def review_texts(invoice_text: str, packing_text: str, metadata: dict | None = N
     passes = 0
     comparisons = []
 
-    def issue(severity: str, code: str, field: str, detail: str, action: str, a=None, b=None, confidence=None):
+    def issue(severity: str, code: str, field: str, detail: str, action: str, a=None, b=None,
+              confidence=None, source_documents=()):
         issues.append({"severity": severity, "code": code, "field": field,
                        "label": LABELS.get(field, field), "detail": detail, "action": action,
-                       "invoice_value": a, "packing_value": b, "confidence": confidence})
+                       "invoice_value": a, "packing_value": b, "confidence": confidence,
+                       "source_documents": list(source_documents)})
 
     for side, flds, original in (("invoice", invoice, invoice_text), ("packing list", packing, packing_text)):
         kind = "invoice" if side == "invoice" else "packing"
         if not original.strip():
             checks += 1
             issue("red", "NO_EXTRACTABLE_TEXT", kind, f"No extractable text in the {side}. This may be a scanned PDF.",
-                  "Use a selectable-text PDF or paste the document text. OCR is not in this version.")
+                  "Use a selectable-text PDF or paste the document text. OCR is not in this version.",
+                  source_documents=(kind,))
         for field in REQUIRED[kind]:
             checks += 1
             if not flds.get(field):
                 issue("red", "MISSING_REQUIRED_FIELD", field, f"{side.title()} is missing {LABELS[field].lower()}.",
-                      f"Check the original {side} or enter the missing information.")
+                      f"Check the original {side} or enter the missing information.",
+                      source_documents=(kind,))
             else:
                 passes += 1
 
@@ -390,26 +402,31 @@ def review_texts(invoice_text: str, packing_text: str, metadata: dict | None = N
                 status = "review"
                 issue("amber", "DESCRIPTION_REVIEW", field,
                       f"Descriptions may refer to the same product (NLP similarity {similarity:.0%}); a person should verify.",
-                      "Confirm product identity before finalising documents.", a, b, round(similarity, 3))
+                      "Confirm product identity before finalising documents.", a, b, round(similarity, 3),
+                      source_documents=("invoice", "packing"))
             else:
                 status = "mismatch"
                 issue("red", "DESCRIPTION_MISMATCH", field,
                       "Product descriptions are substantially different.",
-                      "Confirm both documents describe the same goods.", a, b, round(similarity, 3))
+                      "Confirm both documents describe the same goods.", a, b, round(similarity, 3),
+                      source_documents=("invoice", "packing"))
         else:
             status, aa, bb = compare_values(field, a, b)
             if field in ("consignee", "exporter") and status == "review":
                 issue("amber", "NAME_SUFFIX_REVIEW", field,
                       f"{LABELS[field]} differs only in legal form or spelling; a person should confirm the entity.",
-                      "Confirm both documents name the same legal entity.", a, b)
+                      "Confirm both documents name the same legal entity.", a, b,
+                      source_documents=("invoice", "packing"))
             elif status == "review":
                 issue("amber", "UNREADABLE_VALUE", field,
                       "This field could not be understood as a number or value.",
-                      "Review both values manually.", a, b)
+                      "Review both values manually.", a, b,
+                      source_documents=("invoice", "packing"))
             elif status == "mismatch":
                 issue("red", "CROSS_DOCUMENT_MISMATCH", field,
                       f"{LABELS[field]} differs between the invoice and packing list.",
-                      "Verify the correct value and update the document before approval.", a, b)
+                      "Verify the correct value and update the document before approval.", a, b,
+                      source_documents=("invoice", "packing"))
         if status == "match":
             passes += 1
         comparisons.append({"field": field, "label": LABELS[field], "invoice": a, "packing": b,
@@ -423,7 +440,8 @@ def review_texts(invoice_text: str, packing_text: str, metadata: dict | None = N
             checks += 1
             if g < n:
                 issue("red", "WEIGHT_RULE", "gross_kg", f"{side.title()}: gross weight is less than net weight.",
-                      "Check the weight values in the original document.", flds.get("gross_kg"), flds.get("net_kg"))
+                      "Check the weight values in the original document.", flds.get("gross_kg"), flds.get("net_kg"),
+                      source_documents=("invoice" if side == "invoice" else "packing",))
             else:
                 passes += 1
         for field in ("quantity", "cartons", "gross_kg", "net_kg"):
@@ -435,10 +453,12 @@ def review_texts(invoice_text: str, packing_text: str, metadata: dict | None = N
                     # is. Ask a person instead of asserting an error.
                     issue("amber", "UNREADABLE_VALUE", field,
                           f"{side.title()}: {LABELS[field].lower()} could not be read as a number.",
-                          "Confirm this value on the original document.", flds.get(field), None)
+                          "Confirm this value on the original document.", flds.get(field), None,
+                          source_documents=("invoice" if side == "invoice" else "packing",))
                 elif v <= 0 or (field in ("quantity", "cartons") and v != v.to_integral_value()):
                     issue("red", "INVALID_NUMBER", field, f"{side.title()}: invalid {LABELS[field].lower()}.",
-                          "Enter a positive, valid number.", flds.get(field), None)
+                          "Enter a positive, valid number.", flds.get(field), None,
+                          source_documents=("invoice" if side == "invoice" else "packing",))
                 else:
                     passes += 1
 
@@ -450,13 +470,15 @@ def review_texts(invoice_text: str, packing_text: str, metadata: dict | None = N
             # instead of silently dropping the arithmetic check.
             issue("amber", "CHECK_SKIPPED", "total_value_usd",
                   "The invoice total could not be verified because quantity, unit price or total value could not be read as numbers.",
-                  "Confirm these three values on the original invoice.", invoice.get("total_value_usd"), None)
+                  "Confirm these three values on the original invoice.", invoice.get("total_value_usd"), None,
+                  source_documents=("invoice",))
         else:
             expected = qty * unit
             if abs(expected - total) > Decimal("0.02"):
                 issue("red", "INVOICE_TOTAL_ERROR", "total_value_usd",
                       f"Invoice total is {total}, but quantity × unit price = {expected}.",
-                      "Check the calculation or specify discounts and extra charges outside this MVP.", str(total), str(expected))
+                      "Check the calculation or specify discounts and extra charges outside this MVP.", str(total), str(expected),
+                      source_documents=("invoice",))
             else:
                 passes += 1
 
@@ -466,13 +488,16 @@ def review_texts(invoice_text: str, packing_text: str, metadata: dict | None = N
         if state == "ambiguous":
             issue("amber", "AMBIGUOUS_DATE", "invoice_date",
                   "The invoice date could not be read unambiguously (day/month order); do not guess.",
-                  "Confirm the issue date with the original invoice.", invoice["invoice_date"])
+                  "Confirm the issue date with the original invoice.", invoice["invoice_date"],
+                  source_documents=("invoice",))
         elif dt is None:
             issue("amber", "DATE_FORMAT", "invoice_date", "Invoice date is not in a recognised format.",
-                  "Confirm the date with the original invoice.", invoice["invoice_date"])
+                  "Confirm the date with the original invoice.", invoice["invoice_date"],
+                  source_documents=("invoice",))
         elif dt > date.today() + timedelta(days=1):
             issue("amber", "FUTURE_DATE", "invoice_date", "Invoice date is in the future.",
-                  "Check the issue date.", invoice["invoice_date"])
+                  "Check the issue date.", invoice["invoice_date"],
+                  source_documents=("invoice",))
         else:
             passes += 1
 

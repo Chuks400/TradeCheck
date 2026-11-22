@@ -114,6 +114,49 @@ class LocalLLMReviewTests(unittest.TestCase):
         self.assertIn("extracted by the local model", item["detail"])
         self.assertEqual("llm", r["field_sources"]["invoice"]["cartons"])
 
+    def test_missing_invoice_quantity_stays_red_when_packing_llm_extracts_it(self):
+        # Reproduces the Packlistly issue: a value in one document must not
+        # soften an unrelated missing-field error in the other document.
+        invoice = INVOICE.replace("Quantity (pcs): 5000\n", "")
+        packing = PACKING.replace("Quantity (pcs): 5000\n", "Warehouse count: 5000\n")
+        def fake(text, model):
+            return {"quantity": "5000"} if "Warehouse count" in text else {}
+        r = review_with_local_llm(invoice, packing, use_llm=True, extractor=fake)
+        issue = next(i for i in r["issues"]
+                     if i["code"] == "MISSING_REQUIRED_FIELD" and i["field"] == "quantity")
+        self.assertEqual("red", issue["severity"])
+        self.assertEqual(["invoice"], issue["source_documents"])
+        self.assertEqual("llm", r["field_sources"]["packing"]["quantity"])
+        self.assertEqual("red", r["status"])
+
+    def test_optional_llm_po_cannot_downgrade_independent_invoice_packing_error(self):
+        invoice = INVOICE + "Purchase Order: BW-4471\n"
+        packing = PACKING + "Purchase Order: BW-9999\n"
+        bol = "Draft reference BW-4471"
+        def fake(text, model):
+            return {"po_number": "BW-4471"} if "Draft reference" in text else {}
+        r = review_with_local_llm(
+            invoice, packing, {"bol": bol}, use_llm=True, extractor=fake,
+        )
+        issue = next(i for i in r["issues"] if i["code"] == "CROSS_DOCUMENT_MISMATCH"
+                     and i["field"] == "po_number")
+        self.assertEqual("red", issue["severity"])
+        self.assertEqual(["invoice", "packing"], issue["source_documents"])
+        self.assertEqual("llm", r["field_sources"]["bol"]["po_number"])
+
+    def test_optional_llm_po_mismatch_is_amber_if_model_supplied_bol_value(self):
+        invoice = INVOICE + "Purchase Order: BW-4471\n"
+        bol = "Draft reference BW-9999"
+        def fake(text, model):
+            return {"po_number": "BW-9999"} if "Draft reference" in text else {}
+        r = review_with_local_llm(
+            invoice, PACKING, {"bol": bol}, use_llm=True, extractor=fake,
+        )
+        issue = next(i for i in r["issues"] if i["code"] == "DRAFT_DOCUMENT_MISMATCH"
+                     and i["field"] == "po_number")
+        self.assertEqual("amber", issue["severity"])
+        self.assertEqual(["invoice", "bol"], issue["source_documents"])
+
     def test_guard_drops_exporter_identical_to_consignee(self):
         def fake(text, model):
             if text == INVOICE:
