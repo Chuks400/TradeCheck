@@ -29,12 +29,12 @@ MAX_FILE_BYTES = 8 * 1024 * 1024
 MAX_TEXT = 150_000
 FIELD_PATTERNS = {
     "invoice_number": r"(?:Invoice\s*(?:No\.?|Number|#))",
-    "invoice_date": r"(?:Invoice\s*Date|Issue\s*Date|Document\s*Date)",
+    "invoice_date": r"(?:Invoice\s*Date\.?|Issue\s*Date|Document\s*Date)",
     "exporter": r"(?:Exporter|Shipper|Seller)",
     "consignee": r"(?:Consignee|Buyer)",
-    "po_number": r"(?:Purchase\s*Order|PO\s*(?:No\.?|Number|#))",
+    "po_number": r"(?:Purchase\s*Order|P\s*/\s*O\s*(?:No\.?|Number|#)|PO\s*(?:No\.?|Number|#))",
     "description": r"(?:Description\s*of\s*Goods|Product\s*Description|Item\s*Description)",
-    "hs_code": r"(?:HS\s*(?:Code|Number))",
+    "hs_code": r"(?:HS|HTS)\s*(?:Code|Number)\.?",
     "origin": r"(?:Country\s*of\s*Origin|Origin\s*Country|Origin)",
     "quantity": r"(?:Quantity\s*(?:\(\s*(?:pcs|pieces|units)\s*\))?|Total\s*Quantity)",
     "cartons": r"(?:Cartons|Total\s*Cartons|Number\s*of\s*Cartons)",
@@ -58,7 +58,8 @@ def compile_patterns(patterns: dict[str, str]) -> dict[str, re.Pattern]:
         for name, expression in patterns.items()
     }
 REQUIRED = {
-    "invoice": ["invoice_number", "invoice_date", "description", "quantity", "cartons", "gross_kg", "origin"],
+    # Gross weight is often listed on the packing list, not the commercial invoice.
+    "invoice": ["invoice_number", "invoice_date", "description", "quantity", "cartons", "origin"],
     "packing": ["invoice_number", "description", "quantity", "cartons", "gross_kg", "origin"],
 }
 NUMERIC = {"quantity", "cartons", "gross_kg", "net_kg", "unit_price_usd", "total_value_usd"}
@@ -69,7 +70,7 @@ UNIT_ALIASES = {
     "kilos": ("kg", Decimal("1")), "kilogram": ("kg", Decimal("1")), "kilograms": ("kg", Decimal("1")),
     "lb": ("kg", Decimal("0.45359237")), "lbs": ("kg", Decimal("0.45359237")),
     "pound": ("kg", Decimal("0.45359237")), "pounds": ("kg", Decimal("0.45359237")),
-    "pc": ("pcs", Decimal("1")), "pcs": ("pcs", Decimal("1")), "piece": ("pcs", Decimal("1")),
+    "pc": ("pcs", Decimal("1")), "pcs": ("pcs", Decimal("1")), "ea": ("pcs", Decimal("1")), "each": ("pcs", Decimal("1")), "piece": ("pcs", Decimal("1")),
     "pieces": ("pcs", Decimal("1")), "unit": ("pcs", Decimal("1")), "units": ("pcs", Decimal("1")),
     "set": ("pcs", Decimal("1")), "sets": ("pcs", Decimal("1")),
     "doz": ("pcs", Decimal("12")), "dz": ("pcs", Decimal("12")),
@@ -133,11 +134,19 @@ def parse_fields(text: str, compiled: dict | None = None) -> dict[str, str]:
         line = line.strip()
         if not line:
             continue
-        for field, pat in patterns.items():
-            m = pat.match(line)
-            if m and m.group(1).strip() and field not in fields:
-                fields[field] = m.group(1).strip()
-                break
+        # PyMuPDF may put two printed table columns on one text line.
+        # Split only at wide whitespace ahead of a recognised label.
+        segments = re.split(r"\s{3,}(?=(?:Invoice\s*(?:No\.?|Number|Date\.?)|L/C\s*Number|Delivery\s*To|Payment\s*Term|Port\s*of)\s*:)", line, flags=re.I)
+        for segment in segments:
+            for field, pat in patterns.items():
+                m = pat.match(segment)
+                if m and m.group(1).strip() and field not in fields:
+                    value = m.group(1).strip()
+                    if field in ("po_number", "invoice_number", "origin", "hs_code"):
+                        value = re.split(r"\s{3,}", value, maxsplit=1)[0].strip()
+                    fields[field] = value
+                    break
+
     return fields
 
 
@@ -157,6 +166,7 @@ def number(text: str | None) -> Decimal | None:
     clean = _LEADING_CURRENCY.sub("", clean)
     clean = _TRAILING_CURRENCY.sub("", clean)
     clean = _TRAILING_PAREN.sub("", clean)
+    clean = re.sub(r"/\s*(?:EA|PC|PCS|UNIT|UNITS|KG|KGS)$", "", clean, flags=re.I)
     m = _TRAILING_WORD.search(clean)
     if m and m.group(1).lower() in UNIT_ALIASES:
         clean = clean[: m.start()]
@@ -274,6 +284,12 @@ def parse_document_date(value: str | None) -> tuple[date | None, str]:
             return datetime.strptime(s, fmt).date(), "ok"
         except ValueError:
             pass
+    m = re.fullmatch(r"([A-Za-z]{3,9})\s+(\d{1,2}),?\s+(\d{4})", s)
+    if m and m.group(1).lower() in MONTHS:
+        try:
+            return date(int(m.group(3)), MONTHS[m.group(1).lower()], int(m.group(2))), "ok"
+        except ValueError:
+            return None, "unrecognised"
     m = re.fullmatch(r"(\d{1,2})[\s.\-]+([A-Za-z]{3,9})[\s.\-]+(\d{4})", s)
     if m and m.group(2).lower() in MONTHS:
         try:
