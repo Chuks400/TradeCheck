@@ -178,6 +178,28 @@ def enrich_text(
     return text + ("\n" + "\n".join(lines) if lines else ""), added
 
 
+def _guard_volume_as_weight(fields: dict[str, str], source_text: str) -> str | None:
+    """Do not accept a CBM table cell as a net/gross weight.
+
+    In columnar packing lists the last decimal is often volume, after net and
+    gross weight. A value appearing in the source is not proof that its field
+    assignment is correct.
+    """
+    if not re.search(r"\bCBM\b", source_text, re.I):
+        return None
+    for line in source_text.splitlines():
+        # E.g. 1,228 EA 399.10 516.00 15.500, with CBM last.
+        values = re.findall(r"(?<![\w.])\d{1,3}(?:,\d{3})*(?:\.\d+)?(?![\w.])", line)
+        if len(values) < 4 or not re.search(r"\b(?:EA|PCS|CTNS|CARTONS)\b", line, re.I):
+            continue
+        volume = values[-1].replace(",", "")
+        for field in ("net_kg", "gross_kg"):
+            if fields.get(field) and fields[field].replace(",", "").strip() == volume:
+                del fields[field]
+                return f"{field} discarded: model selected the CBM column instead of a weight."
+    return None
+
+
 def _apply_guards(fields: dict[str, str]) -> tuple[dict[str, str], list[str]]:
     """Reject label assignments that are internally implausible."""
     notes = []
@@ -263,6 +285,10 @@ def review_with_local_llm(
                     raise ValueError("Document content must be text.")
                 suggested = extract(text, model) if text.strip() else {}
                 suggested, guard_notes = _apply_guards(dict(suggested or {}))
+                if kind == "packing":
+                    volume_note = _guard_volume_as_weight(suggested, text)
+                    if volume_note:
+                        guard_notes.append(volume_note)
                 status["guards"].extend(guard_notes)
                 if kind == "decl":
                     normalized, added = enrich_text(text, suggested, DECL_LABELS, DECL_COMPILED)
