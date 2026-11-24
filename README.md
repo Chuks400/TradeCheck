@@ -128,6 +128,10 @@ Review **the same 7 document pairs** manually and record who spotted which known
 - **No proof of Shenzhou's internal deficiency:** the public company data supports why export operations matter, not that Shenzhou has a high document-error rate.
 - **Results are advisory:** a GREEN outcome means no **implemented** check detected a problem, not that documents are compliant.
 
+## Code guide
+
+For a step-by-step explanation of the architecture, source files, review pipeline, JSON output, optional local LLM, setup, tests and research limitations, see the [TradeCheck Code Guide](CODE_GUIDE.md).
+
 ## Files
 
 - `app.py` – local HTTP server with JSON review endpoint.
